@@ -10,9 +10,9 @@ export function label(move: Move): string {
 }
 
 export function glyph(move: Move): string {
-  if (move === "rock") return "✊";
-  if (move === "paper") return "✋";
-  return "✌️";
+  if (move === "rock") return "R";
+  if (move === "paper") return "P";
+  return "S";
 }
 
 export function randomMove(): Move {

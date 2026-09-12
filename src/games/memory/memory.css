@@ -1,0 +1,38 @@
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(64px, 1fr));
+  gap: 0.65rem;
+  width: min(420px, 100%);
+  margin: 1rem 0;
+}
+
+.memory-card {
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(20, 48, 56, 0.95), rgba(11, 31, 36, 0.9));
+  color: transparent;
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  transform-style: preserve-3d;
+}
+
+.memory-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--teal);
+}
+
+.memory-card.flipped,
+.memory-card.matched {
+  color: var(--foam);
+  background: rgba(45, 212, 191, 0.18);
+  border-color: rgba(45, 212, 191, 0.5);
+}
+
+.memory-card.matched {
+  background: rgba(200, 245, 66, 0.18);
+  border-color: rgba(200, 245, 66, 0.55);
+  color: var(--lime);
+  cursor: default;
+}

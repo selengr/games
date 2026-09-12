@@ -1,0 +1,64 @@
+.rps-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.rps-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(11, 31, 36, 0.55);
+  color: var(--foam);
+  padding: 1rem 0.5rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease;
+}
+
+.rps-btn:hover {
+  transform: translateY(-3px);
+  border-color: var(--lime);
+}
+
+.rps-btn .glyph {
+  display: block;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.rps-btn .name {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.rps-arena {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.rps-side {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1rem 0.75rem;
+  background: rgba(11, 31, 36, 0.4);
+  min-height: 110px;
+}
+
+.rps-side .big {
+  font-size: 2.4rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.rps-vs {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--mist);
+}

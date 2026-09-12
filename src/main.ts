@@ -5,11 +5,11 @@ import { renderRps } from "./games/rps/view";
 import { renderMemory } from "./games/memory/view";
 import { parseRoute } from "./shared/router";
 
-const app = document.querySelector<HTMLDivElement>("#app");
-
-if (!app) {
+const rootEl = document.querySelector<HTMLDivElement>("#app");
+if (!rootEl) {
   throw new Error("Missing #app root");
 }
+const app: HTMLElement = rootEl;
 
 function render(): void {
   const route = parseRoute(window.location.hash);

@@ -61,13 +61,13 @@ export function renderRps(root: HTMLElement): void {
           </div>
           <div class="rps-arena" aria-live="polite">
             <div class="rps-side">
-              <span class="big">${lastPlayer ? glyph(lastPlayer) : "❔"}</span>
+              <span class="big">${lastPlayer ? glyph(lastPlayer) : "?"}</span>
               <strong>You</strong>
               <div class="muted">${lastPlayer ? label(lastPlayer) : "—"}</div>
             </div>
             <div class="rps-vs">VS</div>
             <div class="rps-side">
-              <span class="big">${lastCpu ? glyph(lastCpu) : "❔"}</span>
+              <span class="big">${lastCpu ? glyph(lastCpu) : "?"}</span>
               <strong>CPU</strong>
               <div class="muted">${lastCpu ? label(lastCpu) : "—"}</div>
             </div>

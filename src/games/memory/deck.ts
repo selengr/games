@@ -4,10 +4,26 @@ export type Card = {
   matched: boolean;
 };
 
-const SYMBOLS = ["⬡", "◆", "▲", "●", "★", "✚", "◈", "▮"];
+export type BoardSize = "small" | "normal" | "large";
 
-export function createDeck(): Card[] {
-  const pairs = SYMBOLS.flatMap((symbol, i) => [
+const SYMBOLS = ["⬡", "◆", "▲", "●", "★", "✚", "◈", "▮", "✕", "◎", "◇", "▣"];
+
+export function pairCount(size: BoardSize): number {
+  if (size === "small") return 6;
+  if (size === "large") return 12;
+  return 8;
+}
+
+export function columnsFor(size: BoardSize): number {
+  if (size === "small") return 4;
+  if (size === "large") return 6;
+  return 4;
+}
+
+export function createDeck(size: BoardSize = "normal"): Card[] {
+  const count = pairCount(size);
+  const chosen = SYMBOLS.slice(0, count);
+  const pairs = chosen.flatMap((symbol, i) => [
     { id: i * 2, symbol, matched: false },
     { id: i * 2 + 1, symbol, matched: false },
   ]);

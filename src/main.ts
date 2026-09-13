@@ -12,11 +12,20 @@ if (!rootEl) {
 }
 const app: HTMLElement = rootEl;
 
-type CleanupHost = HTMLElement & { __snakeCleanup?: () => void };
+type CleanupHost = HTMLElement & {
+  __snakeCleanup?: () => void;
+  __tttCleanup?: () => void;
+  __memoryCleanup?: () => void;
+};
 
 function cleanup(): void {
-  (app as CleanupHost).__snakeCleanup?.();
-  (app as CleanupHost).__snakeCleanup = undefined;
+  const host = app as CleanupHost;
+  host.__snakeCleanup?.();
+  host.__tttCleanup?.();
+  host.__memoryCleanup?.();
+  host.__snakeCleanup = undefined;
+  host.__tttCleanup = undefined;
+  host.__memoryCleanup = undefined;
 }
 
 function render(): void {

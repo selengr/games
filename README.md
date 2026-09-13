@@ -1,16 +1,17 @@
 # Arcade Hub
 
-A small TypeScript arcade portfolio with three original browser games:
+A small TypeScript arcade you can actually play:
 
-- **Tic-Tac-Toe** — play vs minimax AI (easy / medium / hard) with saved scores
-- **Rock Paper Scissors** — streak + local stats
-- **Memory Match** — flip pairs and beat your best move count
+- **Snake** — canvas loop, pause, swipe / WASD, high score
+- **Tic-Tac-Toe** — minimax AI (easy / medium / hard), keyboard 1–9
+- **Rock Paper Scissors** — first to 3, streak + career stats
+- **Memory Match** — timer, moves, best run saved locally
 
-Built with **Vite + TypeScript**. No frameworks, no tutorial clones.
+Shared mute, sound effects, and scores that stick in `localStorage`.
 
 ## Live demo
 
-After GitHub Pages is enabled: **https://selengr.github.io/games/**
+https://selengr.github.io/arcade-hub/
 
 ## Run locally
 
@@ -28,15 +29,6 @@ npm run preview
 
 ## Deploy
 
-Push to `main`. The GitHub Actions workflow builds and publishes to GitHub Pages.
+Push to `main`. GitHub Actions builds and publishes Pages.
 
-In the repo settings, set **Pages → Source** to **GitHub Actions** if it is not already.
-
-## Why this project
-
-Rewrote an old beginner games dump into a clean, deployable portfolio piece that shows:
-
-- TypeScript game logic (including minimax)
-- Client-side routing + state
-- localStorage persistence
-- Responsive UI
+Repo settings → Pages → Source → **GitHub Actions**.

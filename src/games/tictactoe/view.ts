@@ -12,12 +12,15 @@ import {
 import "./tictactoe.css";
 
 type Scores = { wins: number; losses: number; draws: number };
+type Mode = "ai" | "friend";
 
 const SCORE_KEY = "arcade-ttt-scores";
 
 export function renderTicTacToe(root: HTMLElement): void {
   let board: Board = emptyBoard();
   let difficulty: Difficulty = "medium";
+  let mode: Mode = "ai";
+  let turn: "X" | "O" = "X";
   let locked = false;
   let scores = loadJson<Scores>(SCORE_KEY, { wins: 0, losses: 0, draws: 0 });
 
@@ -26,22 +29,38 @@ export function renderTicTacToe(root: HTMLElement): void {
     const line = winningLine(board);
     const status =
       winner === "X"
-        ? "You win!"
+        ? mode === "ai"
+          ? "You win!"
+          : "X wins!"
         : winner === "O"
-          ? "AI wins."
+          ? mode === "ai"
+            ? "AI wins."
+            : "O wins!"
           : winner === "draw"
             ? "Draw."
             : locked
               ? "AI is thinking…"
-              : "Your turn (X)";
+              : mode === "ai"
+                ? "Your turn (X)"
+                : `${turn}'s turn`;
 
     root.innerHTML = `
-      <div class="shell">
+      <div class="shell route-fade">
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Tic-Tac-Toe</h2>
-          <p class="muted">You are X. Hard mode uses full minimax — it won't lose.</p>
-          <div class="row" role="group" aria-label="Difficulty">
+          <p class="muted">${
+            mode === "ai"
+              ? "You are X. Hard mode uses full minimax — it won't lose."
+              : "Pass the device. X goes first."
+          }</p>
+          <div class="row" role="group" aria-label="Mode">
+            <button class="btn btn-ghost ${mode === "ai" ? "btn-active" : ""}" type="button" data-mode="ai">vs AI</button>
+            <button class="btn btn-ghost ${mode === "friend" ? "btn-active" : ""}" type="button" data-mode="friend">vs friend</button>
+          </div>
+          ${
+            mode === "ai"
+              ? `<div class="row" role="group" aria-label="Difficulty">
             ${(["easy", "medium", "hard"] as Difficulty[])
               .map(
                 (level) => `
@@ -53,7 +72,9 @@ export function renderTicTacToe(root: HTMLElement): void {
             `,
               )
               .join("")}
-          </div>
+          </div>`
+              : ""
+          }
           <div class="scoreboard" aria-live="polite">
             <span class="score-pill">Wins ${scores.wins}</span>
             <span class="score-pill">Losses ${scores.losses}</span>
@@ -103,8 +124,20 @@ export function renderTicTacToe(root: HTMLElement): void {
     root.querySelector("[data-reset]")?.addEventListener("click", () => {
       sfx.tap();
       board = emptyBoard();
+      turn = "X";
       locked = false;
       paint();
+    });
+
+    root.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sfx.tap();
+        mode = btn.dataset.mode as Mode;
+        board = emptyBoard();
+        turn = "X";
+        locked = false;
+        paint();
+      });
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-diff]").forEach((btn) => {
@@ -112,6 +145,7 @@ export function renderTicTacToe(root: HTMLElement): void {
         sfx.tap();
         difficulty = btn.dataset.diff as Difficulty;
         board = emptyBoard();
+        turn = "X";
         locked = false;
         paint();
       });
@@ -125,7 +159,7 @@ export function renderTicTacToe(root: HTMLElement): void {
     });
   };
 
-  const record = (result: "X" | "O" | "draw"): void => {
+  const recordAi = (result: "X" | "O" | "draw"): void => {
     if (result === "X") {
       scores.wins += 1;
       sfx.win();
@@ -142,11 +176,22 @@ export function renderTicTacToe(root: HTMLElement): void {
   const playAt = (i: number): void => {
     if (locked || getWinner(board) || board[i] !== null) return;
 
+    if (mode === "friend") {
+      board[i] = turn;
+      sfx.place();
+      const result = getWinner(board);
+      if (result === "X" || result === "O") sfx.win();
+      else if (result === "draw") sfx.draw();
+      else turn = turn === "X" ? "O" : "X";
+      paint();
+      return;
+    }
+
     board[i] = "X";
     sfx.place();
     const afterHuman = getWinner(board);
     if (afterHuman) {
-      record(afterHuman);
+      recordAi(afterHuman);
       paint();
       return;
     }
@@ -159,7 +204,7 @@ export function renderTicTacToe(root: HTMLElement): void {
       if (board[move] === null) board[move] = "O";
       sfx.place();
       const afterAi = getWinner(board);
-      if (afterAi) record(afterAi);
+      if (afterAi) recordAi(afterAi);
       locked = false;
       paint();
     }, 320);

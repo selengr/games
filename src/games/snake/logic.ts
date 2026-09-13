@@ -24,6 +24,7 @@ export function step(
   snake: Point[],
   dir: Dir,
   food: Point,
+  wrap = false,
 ): { snake: Point[]; food: Point; ate: boolean; dead: boolean } {
   const head = snake[0];
   if (!head) {
@@ -36,7 +37,10 @@ export function step(
   if (dir === "left") next.x -= 1;
   if (dir === "right") next.x += 1;
 
-  if (next.x < 0 || next.y < 0 || next.x >= GRID || next.y >= GRID) {
+  if (wrap) {
+    next.x = (next.x + GRID) % GRID;
+    next.y = (next.y + GRID) % GRID;
+  } else if (next.x < 0 || next.y < 0 || next.x >= GRID || next.y >= GRID) {
     return { snake, food, ate: false, dead: true };
   }
 
@@ -67,4 +71,12 @@ export function startSnake(): Point[] {
     { x: mid - 1, y: mid },
     { x: mid - 2, y: mid },
   ];
+}
+
+export type Speed = "chill" | "normal" | "insane";
+
+export function tickMs(speed: Speed): number {
+  if (speed === "chill") return 160;
+  if (speed === "insane") return 75;
+  return 120;
 }

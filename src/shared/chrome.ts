@@ -51,9 +51,6 @@ export function bindChrome(root: HTMLElement, onChange?: () => void): void {
     unlockAudio();
     const value = Number((e.target as HTMLInputElement).value) / 100;
     setVolume(value);
-    if (value === 0) {
-      // keep muted flag in sync when dragged to zero
-    }
     sfx.tap();
   });
 }

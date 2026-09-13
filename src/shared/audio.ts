@@ -1,4 +1,4 @@
-import { isMuted } from "./settings";
+import { isMuted, getVolume } from "./settings";
 
 let ctx: AudioContext | null = null;
 
@@ -33,9 +33,10 @@ function beep(
 
   const osc = audio.createOscillator();
   const vol = audio.createGain();
+  const level = gain * getVolume();
   osc.type = type;
   osc.frequency.value = freq;
-  vol.gain.value = gain;
+  vol.gain.value = Math.max(0.0001, level);
   vol.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + duration);
   osc.connect(vol);
   vol.connect(audio.destination);

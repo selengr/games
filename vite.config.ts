@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/games/",
+  base: "/arcade-hub/",
   build: {
     outDir: "dist",
   },

@@ -1,0 +1,55 @@
+.snake-wrap {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.snake-canvas {
+  width: min(420px, 100%);
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #071418;
+  display: block;
+  touch-action: none;
+  box-shadow: var(--shadow);
+}
+
+.snake-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.snake-pad .btn {
+  padding: 0;
+  border-radius: 12px;
+}
+
+.snake-pad [data-dir="up"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.snake-pad [data-dir="left"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.snake-pad [data-dir="down"] {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.snake-pad [data-dir="right"] {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+@media (min-width: 720px) {
+  .snake-pad {
+    display: none;
+  }
+}

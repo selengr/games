@@ -1,33 +1,73 @@
-import { setRoute } from "../../shared/router";
+import { bindChrome, renderChrome } from "../../shared/chrome";
+import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
 import { allMatched, createDeck, type Card } from "./deck";
 import "./memory.css";
 
-const BEST_KEY = "arcade-memory-best";
+type Best = { moves: number; seconds: number };
+
+const BEST_KEY = "arcade-memory-best-v2";
+
+function formatTime(total: number): string {
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
 export function renderMemory(root: HTMLElement): void {
   let cards: Card[] = createDeck();
   let flipped: number[] = [];
   let busy = false;
   let moves = 0;
-  let best = loadJson<number | null>(BEST_KEY, null);
+  let seconds = 0;
+  let started = false;
+  let tick: number | null = null;
+  let best = loadJson<Best | null>(BEST_KEY, null);
+
+  const stopTimer = (): void => {
+    if (tick !== null) {
+      window.clearInterval(tick);
+      tick = null;
+    }
+  };
+
+  const startTimer = (): void => {
+    if (started) return;
+    started = true;
+    tick = window.setInterval(() => {
+      seconds += 1;
+      const el = root.querySelector("[data-timer]");
+      if (el) el.textContent = formatTime(seconds);
+    }, 1000);
+  };
 
   const paint = (): void => {
     const done = allMatched(cards);
     const status = done
-      ? `Cleared in ${moves} moves${best !== null ? ` · best ${best}` : ""}`
-      : `Moves: ${moves}${best !== null ? ` · best ${best}` : ""}`;
+      ? `Cleared in ${moves} moves · ${formatTime(seconds)}`
+      : `Moves ${moves} · Time ${formatTime(seconds)}`;
 
     root.innerHTML = `
       <div class="shell">
-        <div class="brand-bar">
-          <p class="brand">Arcade Hub</p>
-          <button class="back-btn" type="button" data-back>← All games</button>
-        </div>
+        ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Memory Match</h2>
-          <p class="muted">Find all eight pairs. Fewer moves is better.</p>
+          <p class="muted">Find all eight pairs. Timer starts on your first flip.</p>
+          <div class="scoreboard">
+            <span class="score-pill">Moves ${moves}</span>
+            <span class="score-pill">Time <span data-timer>${formatTime(seconds)}</span></span>
+            ${
+              best
+                ? `<span class="score-pill">Best ${best.moves} / ${formatTime(best.seconds)}</span>`
+                : ""
+            }
+          </div>
           <p class="status">${status}</p>
+          ${
+            done
+              ? `<div class="overlay-card"><strong>Nice clear!</strong>Shuffle again to beat your best.</div>`
+              : ""
+          }
           <div class="memory-grid" role="grid" aria-label="Memory cards">
             ${cards
               .map((card, index) => {
@@ -44,7 +84,7 @@ export function renderMemory(root: HTMLElement): void {
                         ? `Card ${card.symbol}`
                         : "Hidden card"
                     }"
-                    ${card.matched || busy ? "disabled" : ""}
+                    ${card.matched || busy || done ? "disabled" : ""}
                   >${card.matched || flipped.includes(index) ? card.symbol : ""}</button>
                 `;
               })
@@ -57,23 +97,31 @@ export function renderMemory(root: HTMLElement): void {
       </div>
     `;
 
-    root.querySelector("[data-back]")?.addEventListener("click", () => setRoute("hub"));
+    bindChrome(root, paint);
+
     root.querySelector("[data-reset]")?.addEventListener("click", () => {
+      sfx.tap();
+      stopTimer();
       cards = createDeck();
       flipped = [];
       busy = false;
       moves = 0;
+      seconds = 0;
+      started = false;
       paint();
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-index]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (busy) return;
+        if (busy || done) return;
         const index = Number(btn.dataset.index);
         const card = cards[index];
         if (!card || card.matched || flipped.includes(index)) return;
 
+        unlockAudio();
+        startTimer();
         flipped.push(index);
+        sfx.flip();
         paint();
 
         if (flipped.length < 2) return;
@@ -88,9 +136,16 @@ export function renderMemory(root: HTMLElement): void {
           first.matched = true;
           second.matched = true;
           flipped = [];
+          sfx.match();
           if (allMatched(cards)) {
-            if (best === null || moves < best) {
-              best = moves;
+            stopTimer();
+            sfx.win();
+            if (
+              !best ||
+              moves < best.moves ||
+              (moves === best.moves && seconds < best.seconds)
+            ) {
+              best = { moves, seconds };
               saveJson(BEST_KEY, best);
             }
           }
@@ -108,6 +163,10 @@ export function renderMemory(root: HTMLElement): void {
       });
     });
   };
+
+  const host = root as HTMLElement & { __memoryCleanup?: () => void };
+  host.__memoryCleanup?.();
+  host.__memoryCleanup = stopTimer;
 
   paint();
 }

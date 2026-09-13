@@ -1,9 +1,11 @@
-export type Route = "hub" | "tictactoe" | "rps" | "memory";
+export type Route = "hub" | "tictactoe" | "rps" | "memory" | "snake";
+
+const routes: Route[] = ["hub", "tictactoe", "rps", "memory", "snake"];
 
 export function parseRoute(hash: string): Route {
   const value = hash.replace(/^#\/?/, "").toLowerCase();
-  if (value === "tictactoe" || value === "rps" || value === "memory") {
-    return value;
+  if ((routes as string[]).includes(value) && value !== "hub") {
+    return value as Route;
   }
   return "hub";
 }

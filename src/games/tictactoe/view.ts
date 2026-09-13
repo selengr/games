@@ -1,4 +1,5 @@
-import { setRoute } from "../../shared/router";
+import { bindChrome, renderChrome } from "../../shared/chrome";
+import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
 import {
   aiPick,
@@ -36,13 +37,10 @@ export function renderTicTacToe(root: HTMLElement): void {
 
     root.innerHTML = `
       <div class="shell">
-        <div class="brand-bar">
-          <p class="brand">Arcade Hub</p>
-          <button class="back-btn" type="button" data-back>← All games</button>
-        </div>
+        ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Tic-Tac-Toe</h2>
-          <p class="muted">You are X. AI uses minimax on hard — it will not lose.</p>
+          <p class="muted">You are X. Hard mode uses full minimax — it won't lose.</p>
           <div class="row" role="group" aria-label="Difficulty">
             ${(["easy", "medium", "hard"] as Difficulty[])
               .map(
@@ -62,6 +60,11 @@ export function renderTicTacToe(root: HTMLElement): void {
             <span class="score-pill">Draws ${scores.draws}</span>
           </div>
           <p class="status">${status}</p>
+          ${
+            winner
+              ? `<div class="overlay-card"><strong>${status}</strong>Hit New game for another round.</div>`
+              : ""
+          }
           <div class="ttt-board" role="grid" aria-label="Tic-tac-toe board">
             ${board
               .map((cell, i) => {
@@ -87,6 +90,7 @@ export function renderTicTacToe(root: HTMLElement): void {
               })
               .join("")}
           </div>
+          <p class="hint">Tip: keys 1–9 pick cells (top-left is 1).</p>
           <div class="row" style="margin-top: 1rem">
             <button class="btn btn-primary" type="button" data-reset>New game</button>
           </div>
@@ -94,8 +98,10 @@ export function renderTicTacToe(root: HTMLElement): void {
       </div>
     `;
 
-    root.querySelector("[data-back]")?.addEventListener("click", () => setRoute("hub"));
+    bindChrome(root, paint);
+
     root.querySelector("[data-reset]")?.addEventListener("click", () => {
+      sfx.tap();
       board = emptyBoard();
       locked = false;
       paint();
@@ -103,6 +109,7 @@ export function renderTicTacToe(root: HTMLElement): void {
 
     root.querySelectorAll<HTMLButtonElement>("[data-diff]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        sfx.tap();
         difficulty = btn.dataset.diff as Difficulty;
         board = emptyBoard();
         locked = false;
@@ -112,39 +119,61 @@ export function renderTicTacToe(root: HTMLElement): void {
 
     root.querySelectorAll<HTMLButtonElement>("[data-cell]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (locked || getWinner(board)) return;
-        const i = Number(btn.dataset.cell);
-        if (board[i]) return;
-
-        board[i] = "X";
-        const afterHuman = getWinner(board);
-        if (afterHuman) {
-          record(afterHuman);
-          paint();
-          return;
-        }
-
-        locked = true;
-        paint();
-
-        window.setTimeout(() => {
-          const move = aiPick(board, difficulty);
-          if (board[move] === null) board[move] = "O";
-          const afterAi = getWinner(board);
-          if (afterAi) record(afterAi);
-          locked = false;
-          paint();
-        }, 320);
+        unlockAudio();
+        playAt(Number(btn.dataset.cell));
       });
     });
   };
 
   const record = (result: "X" | "O" | "draw"): void => {
-    if (result === "X") scores.wins += 1;
-    else if (result === "O") scores.losses += 1;
-    else scores.draws += 1;
+    if (result === "X") {
+      scores.wins += 1;
+      sfx.win();
+    } else if (result === "O") {
+      scores.losses += 1;
+      sfx.lose();
+    } else {
+      scores.draws += 1;
+      sfx.draw();
+    }
     saveJson(SCORE_KEY, scores);
   };
+
+  const playAt = (i: number): void => {
+    if (locked || getWinner(board) || board[i] !== null) return;
+
+    board[i] = "X";
+    sfx.place();
+    const afterHuman = getWinner(board);
+    if (afterHuman) {
+      record(afterHuman);
+      paint();
+      return;
+    }
+
+    locked = true;
+    paint();
+
+    window.setTimeout(() => {
+      const move = aiPick(board, difficulty);
+      if (board[move] === null) board[move] = "O";
+      sfx.place();
+      const afterAi = getWinner(board);
+      if (afterAi) record(afterAi);
+      locked = false;
+      paint();
+    }, 320);
+  };
+
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.key < "1" || e.key > "9") return;
+    playAt(Number(e.key) - 1);
+  };
+
+  window.addEventListener("keydown", onKey);
+  const host = root as HTMLElement & { __tttCleanup?: () => void };
+  host.__tttCleanup?.();
+  host.__tttCleanup = () => window.removeEventListener("keydown", onKey);
 
   paint();
 }

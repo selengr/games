@@ -1,6 +1,7 @@
 import { setRoute, type Route } from "../shared/router";
 import { bindChrome, renderChrome } from "../shared/chrome";
 import { unlockAudio, sfx } from "../shared/audio";
+import { collectStats, renderStatsBlock } from "../shared/stats";
 
 const games: Array<{
   route: Exclude<Route, "hub">;
@@ -12,36 +13,39 @@ const games: Array<{
     route: "snake",
     tag: "Arcade",
     title: "Snake",
-    blurb: "Classic grid snake with high score, pause, and touch controls.",
+    blurb: "Speed modes, wrap walls, pause, swipe, and a saved high score.",
   },
   {
     route: "tictactoe",
     tag: "Strategy",
     title: "Tic-Tac-Toe",
-    blurb: "Play vs minimax AI with easy / medium / hard difficulty and persistent scores.",
+    blurb: "Minimax AI or pass-and-play with a friend. Scores stick around.",
   },
   {
     route: "rps",
     tag: "Reflex",
     title: "Rock Paper Scissors",
-    blurb: "Best-of-five rounds with streak tracking. Outguess the machine.",
+    blurb: "First to three. Track streaks and career wins.",
   },
   {
     route: "memory",
     tag: "Focus",
     title: "Memory Match",
-    blurb: "Flip cards, find pairs, beat your best time and move count.",
+    blurb: "Small, normal, or large boards with timer and best runs.",
   },
 ];
 
 export function renderHub(root: HTMLElement): void {
+  const stats = collectStats();
+
   root.innerHTML = `
-    <div class="shell">
+    <div class="shell route-fade">
       ${renderChrome({ showBack: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Four browser games. Sound, scores, and a real snake loop — pick one.</p>
+        <p>Four browser games with sound, modes, and local scores — pick one.</p>
       </header>
+      ${renderStatsBlock(stats)}
       <section class="game-grid" aria-label="Games">
         ${games
           .map(
@@ -55,7 +59,7 @@ export function renderHub(root: HTMLElement): void {
           )
           .join("")}
       </section>
-      <p class="hub-footer">Tip: unmute from the top bar. Snake likes arrow keys or <kbd>WASD</kbd>.</p>
+      <p class="hub-footer">Tip: use the volume slider up top. Snake likes arrow keys or <kbd>WASD</kbd>.</p>
     </div>
   `;
 

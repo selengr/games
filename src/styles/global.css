@@ -89,6 +89,63 @@ a {
   transform: translateY(-1px);
 }
 
+.chrome-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.icon-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(11, 31, 36, 0.55);
+  color: var(--foam);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.icon-btn[aria-pressed="true"] {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--mist);
+  margin: 0.35rem 0 0;
+}
+
+.overlay-card {
+  margin-top: 1rem;
+  border: 1px solid rgba(200, 245, 66, 0.35);
+  background: rgba(200, 245, 66, 0.08);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+}
+
+.overlay-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.hub-footer {
+  margin-top: 2.5rem;
+  color: var(--mist);
+  font-size: 0.9rem;
+}
+
+.hub-footer kbd {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.8rem;
+  background: rgba(11, 31, 36, 0.5);
+}
+
 .hero {
   margin-bottom: 2.5rem;
   animation: rise 0.7s ease both;

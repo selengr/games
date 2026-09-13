@@ -2,12 +2,12 @@
 
 A small TypeScript arcade you can actually play:
 
-- **Snake** — canvas loop, pause, swipe / WASD, high score
-- **Tic-Tac-Toe** — minimax AI (easy / medium / hard), keyboard 1–9
+- **Snake** — canvas loop, speed modes, wrap walls, pause, swipe / WASD, high score
+- **Tic-Tac-Toe** — minimax AI or vs friend, keyboard 1–9
 - **Rock Paper Scissors** — first to 3, streak + career stats
-- **Memory Match** — timer, moves, best run saved locally
+- **Memory Match** — small / normal / large boards, timer, best run
 
-Shared mute, sound effects, and scores that stick in `localStorage`.
+Shared mute, volume slider, sound effects, hub stats, and scores in `localStorage`.
 
 ## Live demo
 

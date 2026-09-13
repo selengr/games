@@ -57,7 +57,7 @@ export function renderRps(root: HTMLElement): void {
                 : "Pick your move.";
 
     root.innerHTML = `
-      <div class="shell">
+      <div class="shell route-fade">
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Rock Paper Scissors</h2>

@@ -1,0 +1,17 @@
+{
+  "name": "Arcade Hub",
+  "short_name": "Arcade",
+  "description": "Browser arcade with Snake, Tic-Tac-Toe, RPS, and Memory Match.",
+  "start_url": "/arcade-hub/",
+  "display": "standalone",
+  "background_color": "#0b1f24",
+  "theme_color": "#0b1f24",
+  "icons": [
+    {
+      "src": "/arcade-hub/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,12 +1,21 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
-import { allMatched, createDeck, type Card } from "./deck";
+import {
+  allMatched,
+  columnsFor,
+  createDeck,
+  pairCount,
+  type BoardSize,
+  type Card,
+} from "./deck";
 import "./memory.css";
 
 type Best = { moves: number; seconds: number };
 
-const BEST_KEY = "arcade-memory-best-v2";
+function bestKey(size: BoardSize): string {
+  return `arcade-memory-best-${size}`;
+}
 
 function formatTime(total: number): string {
   const m = Math.floor(total / 60);
@@ -15,14 +24,15 @@ function formatTime(total: number): string {
 }
 
 export function renderMemory(root: HTMLElement): void {
-  let cards: Card[] = createDeck();
+  let size: BoardSize = "normal";
+  let cards: Card[] = createDeck(size);
   let flipped: number[] = [];
   let busy = false;
   let moves = 0;
   let seconds = 0;
   let started = false;
   let tick: number | null = null;
-  let best = loadJson<Best | null>(BEST_KEY, null);
+  let best = loadJson<Best | null>(bestKey(size), null);
 
   const stopTimer = (): void => {
     if (tick !== null) {
@@ -41,18 +51,42 @@ export function renderMemory(root: HTMLElement): void {
     }, 1000);
   };
 
+  const freshBoard = (nextSize: BoardSize = size): void => {
+    stopTimer();
+    size = nextSize;
+    cards = createDeck(size);
+    flipped = [];
+    busy = false;
+    moves = 0;
+    seconds = 0;
+    started = false;
+    best = loadJson<Best | null>(bestKey(size), null);
+  };
+
   const paint = (): void => {
     const done = allMatched(cards);
+    const cols = columnsFor(size);
     const status = done
       ? `Cleared in ${moves} moves · ${formatTime(seconds)}`
       : `Moves ${moves} · Time ${formatTime(seconds)}`;
 
     root.innerHTML = `
-      <div class="shell">
+      <div class="shell route-fade">
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Memory Match</h2>
-          <p class="muted">Find all eight pairs. Timer starts on your first flip.</p>
+          <p class="muted">${pairCount(size)} pairs. Timer starts on your first flip.</p>
+          <div class="row" role="group" aria-label="Board size">
+            ${(["small", "normal", "large"] as BoardSize[])
+              .map(
+                (level) => `
+              <button class="btn btn-ghost ${size === level ? "btn-active" : ""}" type="button" data-size="${level}">
+                ${level}
+              </button>
+            `,
+              )
+              .join("")}
+          </div>
           <div class="scoreboard">
             <span class="score-pill">Moves ${moves}</span>
             <span class="score-pill">Time <span data-timer>${formatTime(seconds)}</span></span>
@@ -68,7 +102,7 @@ export function renderMemory(root: HTMLElement): void {
               ? `<div class="overlay-card"><strong>Nice clear!</strong>Shuffle again to beat your best.</div>`
               : ""
           }
-          <div class="memory-grid" role="grid" aria-label="Memory cards">
+          <div class="memory-grid cols-${cols}" role="grid" aria-label="Memory cards">
             ${cards
               .map((card, index) => {
                 const show =
@@ -99,15 +133,17 @@ export function renderMemory(root: HTMLElement): void {
 
     bindChrome(root, paint);
 
+    root.querySelectorAll<HTMLButtonElement>("[data-size]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sfx.tap();
+        freshBoard(btn.dataset.size as BoardSize);
+        paint();
+      });
+    });
+
     root.querySelector("[data-reset]")?.addEventListener("click", () => {
       sfx.tap();
-      stopTimer();
-      cards = createDeck();
-      flipped = [];
-      busy = false;
-      moves = 0;
-      seconds = 0;
-      started = false;
+      freshBoard(size);
       paint();
     });
 
@@ -146,7 +182,7 @@ export function renderMemory(root: HTMLElement): void {
               (moves === best.moves && seconds < best.seconds)
             ) {
               best = { moves, seconds };
-              saveJson(BEST_KEY, best);
+              saveJson(bestKey(size), best);
             }
           }
           paint();

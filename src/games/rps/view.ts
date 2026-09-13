@@ -1,4 +1,5 @@
-import { setRoute } from "../../shared/router";
+import { bindChrome, renderChrome } from "../../shared/chrome";
+import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
 import {
   decide,
@@ -19,6 +20,12 @@ type Stats = {
   bestStreak: number;
 };
 
+type Match = {
+  you: number;
+  cpu: number;
+  target: number;
+};
+
 const STATS_KEY = "arcade-rps-stats";
 
 export function renderRps(root: HTMLElement): void {
@@ -29,33 +36,36 @@ export function renderRps(root: HTMLElement): void {
     streak: 0,
     bestStreak: 0,
   });
+  let match: Match = { you: 0, cpu: 0, target: 3 };
   let lastPlayer: Move | null = null;
   let lastCpu: Move | null = null;
   let lastOutcome: Outcome | null = null;
+  let matchOver: "you" | "cpu" | null = null;
 
   const paint = (): void => {
     const resultText =
-      lastOutcome === "win"
-        ? "You win this round."
-        : lastOutcome === "lose"
-          ? "CPU takes it."
-          : lastOutcome === "draw"
-            ? "Tie."
-            : "Pick your move.";
+      matchOver === "you"
+        ? "You took the match!"
+        : matchOver === "cpu"
+          ? "CPU won the match."
+          : lastOutcome === "win"
+            ? "You win this round."
+            : lastOutcome === "lose"
+              ? "CPU takes it."
+              : lastOutcome === "draw"
+                ? "Tie."
+                : "Pick your move.";
 
     root.innerHTML = `
       <div class="shell">
-        <div class="brand-bar">
-          <p class="brand">Arcade Hub</p>
-          <button class="back-btn" type="button" data-back>← All games</button>
-        </div>
+        ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Rock Paper Scissors</h2>
-          <p class="muted">Track your streak. Local stats stick around between visits.</p>
+          <p class="muted">First to ${match.target}. Streaks and career stats stay on this device.</p>
           <div class="scoreboard">
+            <span class="score-pill">Match ${match.you}–${match.cpu}</span>
             <span class="score-pill">W ${stats.wins}</span>
             <span class="score-pill">L ${stats.losses}</span>
-            <span class="score-pill">D ${stats.draws}</span>
             <span class="score-pill">Streak ${stats.streak}</span>
             <span class="score-pill">Best ${stats.bestStreak}</span>
           </div>
@@ -73,10 +83,15 @@ export function renderRps(root: HTMLElement): void {
             </div>
           </div>
           <p class="status">${resultText}</p>
+          ${
+            matchOver
+              ? `<div class="overlay-card"><strong>${resultText}</strong>Start a new match when you're ready.</div>`
+              : ""
+          }
           <div class="rps-choices">
             ${MOVES.map(
               (move) => `
-              <button class="rps-btn" type="button" data-move="${move}">
+              <button class="rps-btn" type="button" data-move="${move}" ${matchOver ? "disabled" : ""}>
                 <span class="glyph">${glyph(move)}</span>
                 <span class="name">${label(move)}</span>
               </button>
@@ -84,16 +99,31 @@ export function renderRps(root: HTMLElement): void {
             ).join("")}
           </div>
           <div class="row">
+            <button class="btn btn-primary" type="button" data-new-match>New match</button>
             <button class="btn btn-ghost" type="button" data-reset-stats>Reset stats</button>
           </div>
         </section>
       </div>
     `;
 
-    root.querySelector("[data-back]")?.addEventListener("click", () => setRoute("hub"));
+    bindChrome(root, paint);
+
+    root.querySelector("[data-new-match]")?.addEventListener("click", () => {
+      sfx.tap();
+      match = { you: 0, cpu: 0, target: 3 };
+      matchOver = null;
+      lastPlayer = null;
+      lastCpu = null;
+      lastOutcome = null;
+      paint();
+    });
+
     root.querySelector("[data-reset-stats]")?.addEventListener("click", () => {
+      sfx.tap();
       stats = { wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0 };
       saveJson(STATS_KEY, stats);
+      match = { you: 0, cpu: 0, target: 3 };
+      matchOver = null;
       lastPlayer = null;
       lastCpu = null;
       lastOutcome = null;
@@ -102,6 +132,8 @@ export function renderRps(root: HTMLElement): void {
 
     root.querySelectorAll<HTMLButtonElement>("[data-move]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        if (matchOver) return;
+        unlockAudio();
         const player = btn.dataset.move as Move;
         const cpu = randomMove();
         const outcome = decide(player, cpu);
@@ -113,12 +145,20 @@ export function renderRps(root: HTMLElement): void {
           stats.wins += 1;
           stats.streak += 1;
           stats.bestStreak = Math.max(stats.bestStreak, stats.streak);
+          match.you += 1;
+          sfx.win();
         } else if (outcome === "lose") {
           stats.losses += 1;
           stats.streak = 0;
+          match.cpu += 1;
+          sfx.lose();
         } else {
           stats.draws += 1;
+          sfx.draw();
         }
+
+        if (match.you >= match.target) matchOver = "you";
+        if (match.cpu >= match.target) matchOver = "cpu";
 
         saveJson(STATS_KEY, stats);
         paint();

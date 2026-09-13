@@ -7,13 +7,14 @@ import {
   spawnFood,
   startSnake,
   step,
+  tickMs,
   type Dir,
   type Point,
+  type Speed,
 } from "./logic";
 import "./snake.css";
 
 const BEST_KEY = "arcade-snake-best";
-const TICK_MS = 120;
 
 type Phase = "ready" | "running" | "paused" | "over";
 
@@ -27,6 +28,8 @@ export function renderSnake(root: HTMLElement): void {
   let phase: Phase = "ready";
   let timer: number | null = null;
   let lastTouch: Point | null = null;
+  let speed: Speed = "normal";
+  let wrap = false;
 
   const stopLoop = (): void => {
     if (timer !== null) {
@@ -46,11 +49,25 @@ export function renderSnake(root: HTMLElement): void {
             : "Go!";
 
     root.innerHTML = `
-      <div class="shell">
+      <div class="shell route-fade">
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Snake</h2>
-          <p class="muted">Eat the dots. Don't hit the walls — or yourself.</p>
+          <p class="muted">Eat the dots. Walls kill you — unless wrap is on.</p>
+          <div class="row" role="group" aria-label="Speed">
+            ${(["chill", "normal", "insane"] as Speed[])
+              .map(
+                (level) => `
+              <button class="btn btn-ghost ${speed === level ? "btn-active" : ""}" type="button" data-speed="${level}">
+                ${level}
+              </button>
+            `,
+              )
+              .join("")}
+            <button class="btn btn-ghost ${wrap ? "btn-active" : ""}" type="button" data-wrap>
+              ${wrap ? "wrap on" : "wrap off"}
+            </button>
+          </div>
           <div class="scoreboard">
             <span class="score-pill">Score ${score}</span>
             <span class="score-pill">Best ${best}</span>
@@ -82,6 +99,22 @@ export function renderSnake(root: HTMLElement): void {
     bindChrome(root, paint);
     draw();
 
+    root.querySelectorAll<HTMLButtonElement>("[data-speed]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sfx.tap();
+        speed = btn.dataset.speed as Speed;
+        if (phase === "running") startLoop();
+        paint();
+      });
+    });
+
+    root.querySelector("[data-wrap]")?.addEventListener("click", () => {
+      sfx.tap();
+      wrap = !wrap;
+      if (phase !== "running") reset(false);
+      else paint();
+    });
+
     root.querySelector("[data-start]")?.addEventListener("click", () => {
       unlockAudio();
       sfx.tap();
@@ -103,9 +136,7 @@ export function renderSnake(root: HTMLElement): void {
       btn.addEventListener("click", () => {
         unlockAudio();
         queueDir(btn.dataset.dir as Dir);
-        if (phase === "ready") {
-          reset(true);
-        }
+        if (phase === "ready") reset(true);
       });
     });
 
@@ -127,11 +158,8 @@ export function renderSnake(root: HTMLElement): void {
         const dx = t.clientX - lastTouch.x;
         const dy = t.clientY - lastTouch.y;
         if (Math.abs(dx) < 18 && Math.abs(dy) < 18) return;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          queueDir(dx > 0 ? "right" : "left");
-        } else {
-          queueDir(dy > 0 ? "down" : "up");
-        }
+        if (Math.abs(dx) > Math.abs(dy)) queueDir(dx > 0 ? "right" : "left");
+        else queueDir(dy > 0 ? "down" : "up");
         if (phase === "ready") reset(true);
         lastTouch = null;
       },
@@ -147,7 +175,6 @@ export function renderSnake(root: HTMLElement): void {
 
     const cell = canvas.width / GRID;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     ctx.fillStyle = "#0b1f24";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -198,7 +225,7 @@ export function renderSnake(root: HTMLElement): void {
       pending = null;
     }
 
-    const result = step(snake, dir, food);
+    const result = step(snake, dir, food, wrap);
     if (result.dead) {
       phase = "over";
       stopLoop();
@@ -229,7 +256,7 @@ export function renderSnake(root: HTMLElement): void {
 
   const startLoop = (): void => {
     stopLoop();
-    timer = window.setInterval(tick, TICK_MS);
+    timer = window.setInterval(tick, tickMs(speed));
   };
 
   const reset = (autoStart: boolean): void => {
@@ -283,10 +310,9 @@ export function renderSnake(root: HTMLElement): void {
   };
 
   window.addEventListener("keydown", onKey);
-  const prevCleanup = (root as HTMLElement & { __snakeCleanup?: () => void })
-    .__snakeCleanup;
-  prevCleanup?.();
-  (root as HTMLElement & { __snakeCleanup?: () => void }).__snakeCleanup = () => {
+  const host = root as HTMLElement & { __snakeCleanup?: () => void };
+  host.__snakeCleanup?.();
+  host.__snakeCleanup = () => {
     window.removeEventListener("keydown", onKey);
     stopLoop();
   };

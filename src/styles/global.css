@@ -171,6 +171,97 @@ a {
   animation: rise 0.35s ease both;
 }
 
+.help-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 12, 14, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.help-dialog {
+  width: min(420px, 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #102a30;
+  padding: 1.25rem 1.3rem 1.35rem;
+  box-shadow: var(--shadow);
+}
+
+.help-dialog h3 {
+  font-family: var(--font-display);
+  margin: 0 0 0.75rem;
+}
+
+.help-dialog ol {
+  margin: 0 0 1.1rem;
+  padding-left: 1.2rem;
+  color: var(--mist);
+}
+
+.help-dialog li {
+  margin-bottom: 0.45rem;
+}
+
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.achieve-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.achieve-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  background: rgba(11, 31, 36, 0.4);
+  opacity: 0.45;
+}
+
+.achieve-card.on {
+  opacity: 1;
+  border-color: rgba(200, 245, 66, 0.35);
+  background: rgba(200, 245, 66, 0.08);
+}
+
+.achieve-card strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.achieve-card span {
+  color: var(--mist);
+  font-size: 0.8rem;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  z-index: 60;
+  border: 1px solid rgba(200, 245, 66, 0.4);
+  background: #143038;
+  color: var(--foam);
+  border-radius: 999px;
+  padding: 0.65rem 1.1rem;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  animation: rise 0.25s ease both;
+}
+
 .hint {
   font-size: 0.85rem;
   color: var(--mist);

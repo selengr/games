@@ -1,11 +1,13 @@
 import { setRoute } from "./router";
 import { toggleMute, isMuted, getVolume, setVolume } from "./settings";
 import { unlockAudio, sfx } from "./audio";
+import { openHelpModal } from "./help";
 
 export function renderChrome(opts: {
   title?: string;
   showBack?: boolean;
   showVolume?: boolean;
+  helpGame?: "snake" | "tictactoe" | "rps" | "memory";
 }): string {
   const muted = isMuted();
   const volume = Math.round(getVolume() * 100);
@@ -13,6 +15,11 @@ export function renderChrome(opts: {
     <div class="brand-bar">
       <p class="brand">Arcade Hub</p>
       <div class="chrome-actions">
+        ${
+          opts.helpGame
+            ? `<button class="icon-btn" type="button" data-help>Help</button>`
+            : ""
+        }
         <button class="icon-btn" type="button" data-mute aria-pressed="${muted}" title="${muted ? "Unmute" : "Mute"}">
           ${muted ? "Sound off" : "Sound on"}
         </button>
@@ -34,7 +41,11 @@ export function renderChrome(opts: {
   `;
 }
 
-export function bindChrome(root: HTMLElement, onChange?: () => void): void {
+export function bindChrome(
+  root: HTMLElement,
+  onChange?: () => void,
+  helpGame?: "snake" | "tictactoe" | "rps" | "memory",
+): void {
   root.querySelector("[data-back]")?.addEventListener("click", () => {
     sfx.tap();
     setRoute("hub");
@@ -52,5 +63,10 @@ export function bindChrome(root: HTMLElement, onChange?: () => void): void {
     const value = Number((e.target as HTMLInputElement).value) / 100;
     setVolume(value);
     sfx.tap();
+  });
+
+  root.querySelector("[data-help]")?.addEventListener("click", () => {
+    sfx.tap();
+    if (helpGame) openHelpModal(root, helpGame);
   });
 }

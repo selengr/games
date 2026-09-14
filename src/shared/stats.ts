@@ -1,4 +1,9 @@
-import { loadJson } from "./storage";
+import { loadJson, removeJson } from "./storage";
+import {
+  ACHIEVEMENTS,
+  clearAchievements,
+  unlockedIds,
+} from "./achievements";
 
 export type PlayerStats = {
   snakeBest: number;
@@ -66,6 +71,20 @@ export function hasAnyStats(stats: PlayerStats): boolean {
   );
 }
 
+export function clearAllProgress(): void {
+  const keys = [
+    "arcade-snake-best",
+    "arcade-ttt-scores",
+    "arcade-rps-stats",
+    "arcade-memory-best-v2",
+    "arcade-memory-best-small",
+    "arcade-memory-best-normal",
+    "arcade-memory-best-large",
+  ];
+  for (const key of keys) saveJson(key, null);
+  clearAchievements();
+}
+
 function formatTime(total: number): string {
   const m = Math.floor(total / 60);
   const s = total % 60;
@@ -73,20 +92,19 @@ function formatTime(total: number): string {
 }
 
 export function renderStatsBlock(stats: PlayerStats): string {
-  if (!hasAnyStats(stats)) {
-    return `
-      <section class="stats-panel panel">
-        <h2>Your run</h2>
-        <p class="muted">Play a few rounds and your bests will show up here.</p>
-      </section>
-    `;
-  }
+  const unlocked = new Set(unlockedIds());
 
   return `
     <section class="stats-panel panel" aria-label="Player stats">
       <h2>Your run</h2>
-      <p class="muted">Saved on this device.</p>
-      <div class="stats-grid">
+      <p class="muted">${
+        hasAnyStats(stats)
+          ? "Saved on this device."
+          : "Play a few rounds and your bests will show up here."
+      }</p>
+      ${
+        hasAnyStats(stats)
+          ? `<div class="stats-grid">
         <div class="stat-card"><span>Snake best</span><strong>${stats.snakeBest}</strong></div>
         <div class="stat-card"><span>TTT record</span><strong>${stats.tttWins}-${stats.tttLosses}-${stats.tttDraws}</strong></div>
         <div class="stat-card"><span>RPS wins</span><strong>${stats.rpsWins}</strong></div>
@@ -96,6 +114,24 @@ export function renderStatsBlock(stats: PlayerStats): string {
             ? "—"
             : `${stats.memoryBestMoves} / ${formatTime(stats.memoryBestSeconds ?? 0)}`
         }</strong></div>
+      </div>`
+          : ""
+      }
+      <h3 style="margin:1.1rem 0 0;font-family:var(--font-display);font-size:1.1rem">
+        Badges ${unlocked.size}/${ACHIEVEMENTS.length}
+      </h3>
+      <div class="achieve-grid">
+        ${ACHIEVEMENTS.map(
+          (a) => `
+          <div class="achieve-card ${unlocked.has(a.id) ? "on" : ""}">
+            <strong>${a.title}</strong>
+            <span>${a.detail}</span>
+          </div>
+        `,
+        ).join("")}
+      </div>
+      <div class="row" style="margin-top:1rem">
+        <button class="btn btn-ghost" type="button" data-reset-all>Reset all progress</button>
       </div>
     </section>
   `;

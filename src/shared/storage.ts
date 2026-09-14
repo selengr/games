@@ -11,3 +11,7 @@ export function loadJson<T>(key: string, fallback: T): T {
 export function saveJson<T>(key: string, value: T): void {
   localStorage.setItem(key, JSON.stringify(value));
 }
+
+export function removeJson(key: string): void {
+  localStorage.removeItem(key);
+}

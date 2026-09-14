@@ -15,6 +15,7 @@ import {
 import "./balloons.css";
 
 const BEST_KEY = "arcade-balloons-best";
+const STREAK_MS = 1100;
 
 type Phase = "running" | "over";
 
@@ -24,6 +25,8 @@ export function renderBalloons(root: HTMLElement): void {
   let balloons: Balloon[] = [];
   let score = 0;
   let lives = 3;
+  let streak = 0;
+  let lastPopAt = 0;
   let phase: Phase = "running";
   let raf = 0;
   let lastTs = 0;
@@ -34,6 +37,7 @@ export function renderBalloons(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Balloon Pop</h2>
+        <p class="hint">Tap balloons before they float away. Keep a streak going!</p>
         <div class="scoreboard">
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-lives>Lives 3</span>
@@ -59,12 +63,18 @@ export function renderBalloons(root: HTMLElement): void {
   const statusEl = root.querySelector<HTMLElement>("[data-status]");
   const againBtn = root.querySelector<HTMLButtonElement>("[data-again]");
 
+  const runningStatus = (): string => {
+    if (streak >= 5) return `On fire · ${streak} streak!`;
+    if (streak >= 2) return `${streak} streak!`;
+    return "Tap the balloons!";
+  };
+
   const syncHud = (): void => {
     if (scoreEl) scoreEl.textContent = `Score ${score}`;
     if (livesEl) livesEl.textContent = `Lives ${lives}`;
     if (bestEl) bestEl.textContent = `Best ${best}`;
     if (statusEl) {
-      statusEl.textContent = phase === "over" ? "Game over" : "Tap the balloons!";
+      statusEl.textContent = phase === "over" ? "Game over" : runningStatus();
     }
     if (againBtn) againBtn.hidden = phase === "running";
   };
@@ -130,6 +140,7 @@ export function renderBalloons(root: HTMLElement): void {
     const { escaped } = stepBalloons(balloons);
     if (escaped > 0) {
       lives -= escaped;
+      streak = 0;
       sfx.lose();
       if (lives <= 0) {
         lives = 0;
@@ -150,6 +161,8 @@ export function renderBalloons(root: HTMLElement): void {
     balloons = [];
     score = 0;
     lives = 3;
+    streak = 0;
+    lastPopAt = 0;
     phase = "running";
     syncHud();
     draw();
@@ -157,21 +170,29 @@ export function renderBalloons(root: HTMLElement): void {
     raf = requestAnimationFrame(frame);
   };
 
-  canvas?.addEventListener("pointerdown", (e) => {
-    if (phase !== "running" || !canvas) return;
-    unlockAudio();
-    const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-    const hit = hitBalloon(balloons, x, y);
-    if (!hit) return;
-    score += 1;
-    sfx.eat();
-    burstAtElement(canvas);
-    announceUnlocks(checkBalloonsScore(score));
-    maybeCompleteDaily("balloons", score);
-    syncHud();
-  });
+  canvas?.addEventListener(
+    "pointerdown",
+    (e) => {
+      if (phase !== "running" || !canvas) return;
+      e.preventDefault();
+      unlockAudio();
+      const rect = canvas.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+      const hit = hitBalloon(balloons, x, y);
+      if (!hit) return;
+      const now = performance.now();
+      streak = now - lastPopAt <= STREAK_MS ? streak + 1 : 1;
+      lastPopAt = now;
+      score += streak >= 3 ? 2 : 1;
+      sfx.eat();
+      burstAtElement(canvas);
+      announceUnlocks(checkBalloonsScore(score));
+      maybeCompleteDaily("balloons", score);
+      syncHud();
+    },
+    { passive: false },
+  );
 
   againBtn?.addEventListener("click", () => {
     sfx.tap();

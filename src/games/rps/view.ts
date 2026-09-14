@@ -5,7 +5,6 @@ import { checkRpsStreak, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
 import { pushHistory } from "../../shared/history";
-import { getActiveDaily } from "../../shared/daily";
 import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   decide,
@@ -36,7 +35,6 @@ const STATS_KEY = "arcade-rps-stats";
 
 export function renderRps(root: HTMLElement): void {
   markPlayed("rps");
-  const dailyOn = getActiveDaily()?.game === "rps";
   let stats = loadJson<Stats>(STATS_KEY, {
     wins: 0,
     losses: 0,
@@ -53,54 +51,37 @@ export function renderRps(root: HTMLElement): void {
   const paint = (): void => {
     const resultText =
       matchOver === "you"
-        ? "You took the match!"
+        ? "You win!"
         : matchOver === "cpu"
-          ? "CPU won the match."
+          ? "You lose"
           : lastOutcome === "win"
-            ? "You win this round."
+            ? "Nice!"
             : lastOutcome === "lose"
-              ? "CPU takes it."
+              ? "Oops"
               : lastOutcome === "draw"
-                ? "Tie."
-                : "Pick your move.";
+                ? "Tie"
+                : "Pick one";
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true, helpGame: "rps" })}
+        ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Rock Paper Scissors</h2>
-          <p class="muted">First to ${match.target}. Streaks and career stats stay on this device.</p>
-          ${
-            dailyOn
-              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Win this match to clear it.</div>`
-              : ""
-          }
           <div class="scoreboard">
-            <span class="score-pill">Match ${match.you}–${match.cpu}</span>
-            <span class="score-pill">W ${stats.wins}</span>
-            <span class="score-pill">L ${stats.losses}</span>
-            <span class="score-pill">Streak ${stats.streak}</span>
-            <span class="score-pill">Best ${stats.bestStreak}</span>
+            <span class="score-pill">${match.you} – ${match.cpu}</span>
           </div>
           <div class="rps-arena" aria-live="polite">
             <div class="rps-side">
               <span class="big">${lastPlayer ? glyph(lastPlayer) : "?"}</span>
               <strong>You</strong>
-              <div class="muted">${lastPlayer ? label(lastPlayer) : "—"}</div>
             </div>
             <div class="rps-vs">VS</div>
             <div class="rps-side">
               <span class="big">${lastCpu ? glyph(lastCpu) : "?"}</span>
               <strong>CPU</strong>
-              <div class="muted">${lastCpu ? label(lastCpu) : "—"}</div>
             </div>
           </div>
           <p class="status" aria-live="polite">${resultText}</p>
-          ${
-            matchOver
-              ? `<div class="overlay-card"><strong>${resultText}</strong>Start a new match when you're ready.</div>`
-              : ""
-          }
           <div class="rps-choices">
             ${MOVES.map(
               (move) => `
@@ -111,30 +92,21 @@ export function renderRps(root: HTMLElement): void {
             `,
             ).join("")}
           </div>
-          <div class="row">
-            <button class="btn btn-primary" type="button" data-new-match>New match</button>
-            <button class="btn btn-ghost" type="button" data-reset-stats>Reset stats</button>
-          </div>
+          ${
+            matchOver
+              ? `<div class="row">
+                  <button class="btn btn-primary" type="button" data-new-match>Play again</button>
+                </div>`
+              : ""
+          }
         </section>
       </div>
     `;
 
-    bindChrome(root, paint, "rps");
+    bindChrome(root, paint);
 
     root.querySelector("[data-new-match]")?.addEventListener("click", () => {
       sfx.tap();
-      match = { you: 0, cpu: 0, target: 3 };
-      matchOver = null;
-      lastPlayer = null;
-      lastCpu = null;
-      lastOutcome = null;
-      paint();
-    });
-
-    root.querySelector("[data-reset-stats]")?.addEventListener("click", () => {
-      sfx.tap();
-      stats = { wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0 };
-      saveJson(STATS_KEY, stats);
       match = { you: 0, cpu: 0, target: 3 };
       matchOver = null;
       lastPlayer = null;
@@ -174,12 +146,12 @@ export function renderRps(root: HTMLElement): void {
         if (match.you >= match.target) {
           matchOver = "you";
           burstAtElement(root.querySelector(".rps-arena"));
-          pushHistory("RPS", `won match ${match.you}–${match.cpu}`);
+          pushHistory("RPS", "win");
           maybeCompleteDaily("rps", 1);
         }
         if (match.cpu >= match.target) {
           matchOver = "cpu";
-          pushHistory("RPS", `lost match ${match.you}–${match.cpu}`);
+          pushHistory("RPS", "loss");
         }
 
         saveJson(STATS_KEY, stats);

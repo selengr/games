@@ -5,72 +5,98 @@ import { checkFlappyScore, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { pushHistory } from "../../shared/history";
 import { maybeCompleteDaily } from "../../shared/dailyComplete";
-import { createFlappy, flap, stepFlappy, type FlappyState } from "./logic";
+import { getSettings, setFlappyDiff } from "../../shared/settings";
+import {
+  FLAPPY_DIFFS,
+  createFlappy,
+  flap,
+  flappyBestKey,
+  stepFlappy,
+  type FlappyDiff,
+  type FlappyState,
+} from "./logic";
 import "./flappy.css";
-
-const BEST_KEY = "arcade-flappy-best";
 
 type Phase = "running" | "over";
 
 export function renderFlappy(root: HTMLElement): void {
   markPlayed("flappy");
-  let best = loadJson<number>(BEST_KEY, 0);
+  let difficulty = getSettings().flappyDiff;
+  let best = loadJson<number>(flappyBestKey(difficulty), 0);
   let state: FlappyState | null = null;
   let phase: Phase = "running";
   let raf = 0;
   let lastTs = 0;
   let acc = 0;
 
-  root.innerHTML = `
-    <div class="shell route-fade">
-      ${renderChrome({ showBack: true })}
-      <section class="panel">
-        <h2>Flappy Lite</h2>
-        <p class="hint">Tap or press Space to flap through the gaps.</p>
-        <div class="scoreboard">
-          <span class="score-pill" data-score>Score 0</span>
-          <span class="score-pill" data-best>Best ${best}</span>
-        </div>
-        <p class="status" data-status aria-live="polite">Flap!</p>
-        <div class="flappy-wrap">
-          <canvas class="flappy-canvas" width="360" height="540" aria-label="Flappy Lite"></canvas>
-        </div>
-        <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Play again</button>
-        </div>
-      </section>
-    </div>
-  `;
+  const paintShell = (): void => {
+    root.innerHTML = `
+      <div class="shell route-fade">
+        ${renderChrome({ showBack: true })}
+        <section class="panel">
+          <h2>Flappy Lite</h2>
+          <p class="hint">Tap or press Space to flap. Pick a difficulty, then fly.</p>
+          <div class="row flappy-diffs" role="group" aria-label="Difficulty">
+            ${FLAPPY_DIFFS.map(
+              (d) => `
+              <button class="btn ${d === difficulty ? "btn-primary" : "btn-ghost"}" type="button" data-diff="${d}">
+                ${d[0]!.toUpperCase()}${d.slice(1)}
+              </button>`,
+            ).join("")}
+          </div>
+          <div class="scoreboard">
+            <span class="score-pill" data-score>Score 0</span>
+            <span class="score-pill" data-best>Best ${best}</span>
+          </div>
+          <p class="status" data-status aria-live="polite">Flap!</p>
+          <div class="flappy-wrap">
+            <canvas class="flappy-canvas" width="360" height="540" aria-label="Flappy Lite"></canvas>
+          </div>
+          <div class="row" style="margin-top:1rem">
+            <button class="btn btn-primary" type="button" data-again hidden>Play again</button>
+          </div>
+        </section>
+      </div>
+    `;
+    bindChrome(root, () => refreshMuteButton(root));
+    wire();
+  };
 
-  bindChrome(root, () => refreshMuteButton(root));
-
-  const canvas = root.querySelector<HTMLCanvasElement>(".flappy-canvas");
-  const scoreEl = root.querySelector<HTMLElement>("[data-score]");
-  const bestEl = root.querySelector<HTMLElement>("[data-best]");
-  const statusEl = root.querySelector<HTMLElement>("[data-status]");
-  const againBtn = root.querySelector<HTMLButtonElement>("[data-again]");
+  const canvas = (): HTMLCanvasElement | null =>
+    root.querySelector<HTMLCanvasElement>(".flappy-canvas");
+  const scoreEl = (): HTMLElement | null =>
+    root.querySelector<HTMLElement>("[data-score]");
+  const bestEl = (): HTMLElement | null =>
+    root.querySelector<HTMLElement>("[data-best]");
+  const statusEl = (): HTMLElement | null =>
+    root.querySelector<HTMLElement>("[data-status]");
+  const againBtn = (): HTMLButtonElement | null =>
+    root.querySelector<HTMLButtonElement>("[data-again]");
 
   const syncHud = (): void => {
     if (!state) return;
-    if (scoreEl) scoreEl.textContent = `Score ${state.score}`;
-    if (bestEl) bestEl.textContent = `Best ${best}`;
-    if (statusEl) {
-      statusEl.textContent = phase === "over" ? "Crashed!" : "Flap!";
-    }
-    if (againBtn) againBtn.hidden = phase === "running";
+    const s = scoreEl();
+    const b = bestEl();
+    const st = statusEl();
+    const again = againBtn();
+    if (s) s.textContent = `Score ${state.score}`;
+    if (b) b.textContent = `Best ${best}`;
+    if (st) st.textContent = phase === "over" ? "Crashed!" : "Flap!";
+    if (again) again.hidden = phase === "running";
   };
 
   const draw = (): void => {
-    if (!canvas || !state) return;
-    const ctx = canvas.getContext("2d");
+    const c = canvas();
+    if (!c || !state) return;
+    const ctx = c.getContext("2d");
     if (!ctx) return;
 
-    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const g = ctx.createLinearGradient(0, 0, 0, c.height);
     g.addColorStop(0, "#1c4550");
     g.addColorStop(0.7, "#0b1f24");
     g.addColorStop(1, "#163038");
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, c.width, c.height);
 
     for (const pipe of state.pipes) {
       ctx.fillStyle = "#2dd4bf";
@@ -110,9 +136,9 @@ export function renderFlappy(root: HTMLElement): void {
     sfx.die();
     if (state && state.score > best) {
       best = state.score;
-      saveJson(BEST_KEY, best);
+      saveJson(flappyBestKey(difficulty), best);
     }
-    pushHistory("Flappy Lite", `score ${state?.score ?? 0}`);
+    pushHistory("Flappy Lite", `${difficulty} · ${state?.score ?? 0}`);
     maybeCompleteDaily("flappy", state?.score ?? 0);
     syncHud();
   };
@@ -143,9 +169,10 @@ export function renderFlappy(root: HTMLElement): void {
   };
 
   const start = (): void => {
-    if (!canvas) return;
+    const c = canvas();
+    if (!c) return;
     stop();
-    state = createFlappy(canvas.width, canvas.height);
+    state = createFlappy(c.width, c.height, difficulty);
     phase = "running";
     flap(state);
     syncHud();
@@ -160,16 +187,6 @@ export function renderFlappy(root: HTMLElement): void {
     sfx.flap();
   };
 
-  canvas?.addEventListener(
-    "pointerdown",
-    (e) => {
-      e.preventDefault();
-      if (phase === "over") return;
-      doFlap();
-    },
-    { passive: false },
-  );
-
   const onKey = (e: KeyboardEvent): void => {
     if (e.code === "Space" || e.key === " ") {
       e.preventDefault();
@@ -177,12 +194,36 @@ export function renderFlappy(root: HTMLElement): void {
       doFlap();
     }
   };
-  window.addEventListener("keydown", onKey);
 
-  againBtn?.addEventListener("click", () => {
-    sfx.tap();
-    start();
-  });
+  const wire = (): void => {
+    canvas()?.addEventListener(
+      "pointerdown",
+      (e) => {
+        e.preventDefault();
+        if (phase === "over") return;
+        doFlap();
+      },
+      { passive: false },
+    );
+
+    againBtn()?.addEventListener("click", () => {
+      sfx.tap();
+      start();
+    });
+
+    root.querySelectorAll<HTMLButtonElement>("[data-diff]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const next = btn.dataset.diff as FlappyDiff;
+        if (next === difficulty) return;
+        sfx.tap();
+        difficulty = next;
+        setFlappyDiff(next);
+        best = loadJson<number>(flappyBestKey(difficulty), 0);
+        paintShell();
+        start();
+      });
+    });
+  };
 
   const host = root as HTMLElement & { __flappyCleanup?: () => void };
   host.__flappyCleanup?.();
@@ -191,5 +232,7 @@ export function renderFlappy(root: HTMLElement): void {
     window.removeEventListener("keydown", onKey);
   };
 
+  window.addEventListener("keydown", onKey);
+  paintShell();
   start();
 }

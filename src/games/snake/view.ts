@@ -1,6 +1,9 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
+import { checkSnakeScore, markPlayed } from "../../shared/achievements";
+import { announceUnlocks } from "../../shared/toast";
+import { burstAtElement } from "../../shared/fx";
 import {
   GRID,
   canTurn,
@@ -19,6 +22,7 @@ const BEST_KEY = "arcade-snake-best";
 type Phase = "ready" | "running" | "paused" | "over";
 
 export function renderSnake(root: HTMLElement): void {
+  markPlayed("snake");
   let snake = startSnake();
   let dir: Dir = "right";
   let pending: Dir | null = null;
@@ -50,7 +54,7 @@ export function renderSnake(root: HTMLElement): void {
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true })}
+        ${renderChrome({ showBack: true, helpGame: "snake" })}
         <section class="panel">
           <h2>Snake</h2>
           <p class="muted">Eat the dots. Walls kill you — unless wrap is on.</p>
@@ -96,7 +100,7 @@ export function renderSnake(root: HTMLElement): void {
       </div>
     `;
 
-    bindChrome(root, paint);
+    bindChrome(root, paint, "snake");
     draw();
 
     root.querySelectorAll<HTMLButtonElement>("[data-speed]").forEach((btn) => {
@@ -243,6 +247,8 @@ export function renderSnake(root: HTMLElement): void {
     if (result.ate) {
       score += 1;
       sfx.eat();
+      burstAtElement(root.querySelector(".snake-canvas"));
+      announceUnlocks(checkSnakeScore(score));
     }
     draw();
     const scoreEl = root.querySelector(".scoreboard");

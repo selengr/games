@@ -4,14 +4,13 @@ import {
   clearAchievements,
   unlockedIds,
 } from "./achievements";
+import { flappyBestKey, type FlappyDiff } from "../games/flappy/logic";
 
 export type PlayerStats = {
   snakeBest: number;
   tttWins: number;
   tttLosses: number;
   tttDraws: number;
-  rpsWins: number;
-  rpsBestStreak: number;
   memoryBestMoves: number | null;
   memoryBestSeconds: number | null;
 };
@@ -20,10 +19,6 @@ export function collectStats(): PlayerStats {
   const ttt = loadJson<{ wins: number; losses: number; draws: number }>(
     "arcade-ttt-scores",
     { wins: 0, losses: 0, draws: 0 },
-  );
-  const rps = loadJson<{ wins: number; bestStreak: number }>(
-    "arcade-rps-stats",
-    { wins: 0, bestStreak: 0 },
   );
 
   const memoryCandidates = [
@@ -60,8 +55,6 @@ export function collectStats(): PlayerStats {
     tttWins: ttt.wins,
     tttLosses: ttt.losses,
     tttDraws: ttt.draws,
-    rpsWins: rps.wins,
-    rpsBestStreak: rps.bestStreak,
     memoryBestMoves: memory?.moves ?? null,
     memoryBestSeconds: memory?.seconds ?? null,
   };
@@ -71,12 +64,12 @@ export function hasAnyStats(stats: PlayerStats): boolean {
   return (
     stats.snakeBest > 0 ||
     stats.tttWins + stats.tttLosses + stats.tttDraws > 0 ||
-    stats.rpsWins > 0 ||
     stats.memoryBestMoves !== null
   );
 }
 
 export function clearAllProgress(): void {
+  const diffs: FlappyDiff[] = ["easy", "normal", "hard"];
   const keys = [
     "arcade-snake-best",
     "arcade-snake-best-chill",
@@ -88,6 +81,12 @@ export function clearAllProgress(): void {
     "arcade-memory-best-small",
     "arcade-memory-best-normal",
     "arcade-memory-best-large",
+    "arcade-breakout-best",
+    "arcade-balloons-best",
+    "arcade-mole-best",
+    "arcade-reaction-best",
+    "arcade-flappy-best",
+    ...diffs.map((d) => flappyBestKey(d)),
   ];
   for (const key of keys) removeJson(key);
   clearAchievements();
@@ -118,8 +117,6 @@ export function renderStatsBlock(stats: PlayerStats): string {
           ? `<div class="stats-grid">
         <div class="stat-card"><span>Snake best</span><strong>${stats.snakeBest}</strong></div>
         <div class="stat-card"><span>TTT record</span><strong>${stats.tttWins}-${stats.tttLosses}-${stats.tttDraws}</strong></div>
-        <div class="stat-card"><span>RPS wins</span><strong>${stats.rpsWins}</strong></div>
-        <div class="stat-card"><span>RPS streak</span><strong>${stats.rpsBestStreak}</strong></div>
         <div class="stat-card"><span>Memory best</span><strong>${
           stats.memoryBestMoves === null
             ? "—"

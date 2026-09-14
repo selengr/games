@@ -25,6 +25,8 @@ const TITLES: Record<DailyGame, string> = {
   memory: "Memory dash",
   rps: "RPS match",
   tictactoe: "Beat the AI",
+  breakout: "Brick bash",
+  balloons: "Pop party",
 };
 
 export function todayKey(d = new Date()): string {
@@ -40,7 +42,14 @@ function dayIndex(date = todayKey()): number {
 }
 
 export function getDailyChallenge(date = todayKey()): DailyChallenge {
-  const games: DailyGame[] = ["snake", "memory", "rps", "tictactoe"];
+  const games: DailyGame[] = [
+    "snake",
+    "memory",
+    "rps",
+    "tictactoe",
+    "breakout",
+    "balloons",
+  ];
   const idx = dayIndex(date) % games.length;
   const game = games[idx]!;
   const target =
@@ -48,9 +57,11 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
       ? 8 + (dayIndex(date) % 10)
       : game === "memory"
         ? 18 + (dayIndex(date) % 8)
-        : game === "rps"
+        : game === "breakout"
           ? 1
-          : 1;
+          : game === "balloons"
+            ? 12 + (dayIndex(date) % 10)
+            : 1;
 
   const detail =
     game === "snake"
@@ -59,7 +70,11 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
         ? `Clear a normal board in ${target} moves or fewer.`
         : game === "rps"
           ? "Win one first-to-three match."
-          : "Win a round against the AI (any difficulty).";
+          : game === "breakout"
+            ? "Clear all bricks in one run."
+            : game === "balloons"
+              ? `Pop at least ${target} balloons.`
+              : "Win a round against the AI.";
 
   return {
     date,
@@ -110,17 +125,14 @@ export function clearActiveDaily(): void {
   removeJson(ACTIVE_KEY);
 }
 
-export function tryCompleteDaily(
-  game: DailyGame,
-  value: number,
-): boolean {
+export function tryCompleteDaily(game: DailyGame, value: number): boolean {
   const active = getActiveDaily();
   const challenge = getDailyChallenge();
   if (!active || active.game !== game || active.game !== challenge.game) {
     return false;
   }
   const ok =
-    game === "snake"
+    game === "snake" || game === "balloons" || game === "breakout"
       ? value >= challenge.target
       : game === "memory"
         ? value <= challenge.target

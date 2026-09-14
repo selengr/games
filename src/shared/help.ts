@@ -22,14 +22,6 @@ const HELP: Record<string, HelpContent> = {
       "Number keys 1–9 pick cells (top-left is 1).",
     ],
   },
-  rps: {
-    title: "How to play Rock Paper Scissors",
-    steps: [
-      "Rock beats scissors, scissors beat paper, paper beats rock.",
-      "First to three round wins takes the match.",
-      "Streaks and career stats save on this device.",
-    ],
-  },
   memory: {
     title: "How to play Memory",
     steps: [

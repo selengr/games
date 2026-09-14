@@ -7,7 +7,7 @@ A small TypeScript arcade you can actually play:
 - **Rock Paper Scissors** — first to 3, streak + career stats
 - **Memory Match** — small / normal / large boards, timer, best run
 
-Shared mute, volume slider, sound effects, hub stats, badges, how-to-play help, continue last game, offline cache, and scores in `localStorage`.
+Shared mute, volume slider, daily challenge, play history, badges, how-to-play help, continue last game, offline cache, and scores in `localStorage`.
 
 ## Live demo
 

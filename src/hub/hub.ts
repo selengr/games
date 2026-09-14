@@ -8,6 +8,7 @@ import {
   startDailyRun,
 } from "../shared/daily";
 import { formatWhen, getHistory } from "../shared/history";
+import { ACHIEVEMENTS, unlockedIds } from "../shared/achievements";
 
 const games: Array<{
   route: Exclude<Route, "hub">;
@@ -33,6 +34,41 @@ const labels: Record<Exclude<Route, "hub">, string> = {
   rps: "Rock Paper Scissors",
   memory: "Memory",
 };
+
+function badgesStripHtml(): string {
+  const unlocked = new Set(unlockedIds());
+  const count = unlocked.size;
+  const total = ACHIEVEMENTS.length;
+  const ordered = [
+    ...ACHIEVEMENTS.filter((a) => unlocked.has(a.id)),
+    ...ACHIEVEMENTS.filter((a) => !unlocked.has(a.id)),
+  ];
+
+  return `
+    <section class="panel badge-strip" aria-label="Badges">
+      <div class="badge-strip-head">
+        <h2>Badges</h2>
+        <span class="count">${count}/${total}</span>
+      </div>
+      ${
+        count === 0
+          ? `<p class="badge-empty">Play to unlock badges — they show up here.</p>`
+          : ""
+      }
+      <div class="badge-rail">
+        ${ordered
+          .map(
+            (a) => `
+          <div class="badge-chip ${unlocked.has(a.id) ? "on" : ""}" title="${a.detail}">
+            <strong>${a.title}</strong>
+            <span>${a.detail}</span>
+          </div>`,
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
 
 export function renderHub(root: HTMLElement): void {
   const lastGame = getSettings().lastGame;
@@ -65,6 +101,8 @@ export function renderHub(root: HTMLElement): void {
           </button>
         </div>
       </section>
+
+      ${badgesStripHtml()}
 
       <section class="game-grid" aria-label="Games">
         ${games

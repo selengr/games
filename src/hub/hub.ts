@@ -1,7 +1,11 @@
 import { setRoute, type Route } from "../shared/router";
 import { bindChrome, renderChrome } from "../shared/chrome";
 import { unlockAudio, sfx } from "../shared/audio";
-import { collectStats, renderStatsBlock } from "../shared/stats";
+import {
+  clearAllProgress,
+  collectStats,
+  renderStatsBlock,
+} from "../shared/stats";
 
 const games: Array<{
   route: Exclude<Route, "hub">;
@@ -43,7 +47,7 @@ export function renderHub(root: HTMLElement): void {
       ${renderChrome({ showBack: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Four browser games with sound, modes, and local scores — pick one.</p>
+        <p>Four browser games with sound, modes, badges, and local scores.</p>
       </header>
       ${renderStatsBlock(stats)}
       <section class="game-grid" aria-label="Games">
@@ -59,11 +63,18 @@ export function renderHub(root: HTMLElement): void {
           )
           .join("")}
       </section>
-      <p class="hub-footer">Tip: use the volume slider up top. Snake likes arrow keys or <kbd>WASD</kbd>.</p>
+      <p class="hub-footer">Tip: open Help inside a game. Snake likes arrow keys or <kbd>WASD</kbd>.</p>
     </div>
   `;
 
   bindChrome(root, () => renderHub(root));
+
+  root.querySelector("[data-reset-all]")?.addEventListener("click", () => {
+    if (!window.confirm("Reset all scores and badges on this device?")) return;
+    sfx.tap();
+    clearAllProgress();
+    renderHub(root);
+  });
 
   root.querySelectorAll<HTMLButtonElement>("[data-route]").forEach((btn) => {
     btn.addEventListener("click", () => {

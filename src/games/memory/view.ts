@@ -5,6 +5,9 @@ import { checkMemoryClear, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
 import { shareText } from "../../shared/share";
+import { pushHistory } from "../../shared/history";
+import { getActiveDaily } from "../../shared/daily";
+import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   allMatched,
   columnsFor,
@@ -75,6 +78,7 @@ export function renderMemory(root: HTMLElement): void {
   const paint = (): void => {
     const done = allMatched(cards);
     const cols = columnsFor(size);
+    const daily = getActiveDaily();
     const status = done
       ? `Cleared in ${moves} moves · ${formatTime(seconds)}`
       : `Moves ${moves} · Time ${formatTime(seconds)}`;
@@ -85,6 +89,11 @@ export function renderMemory(root: HTMLElement): void {
         <section class="panel">
           <h2>Memory Match</h2>
           <p class="muted">${pairCount(size)} pairs. Timer starts on your first flip.</p>
+          ${
+            daily?.game === "memory"
+              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Clear a normal board within the move limit.</div>`
+              : ""
+          }
           <div class="row" role="group" aria-label="Board size">
             ${(["small", "normal", "large"] as BoardSize[])
               .map(
@@ -106,7 +115,7 @@ export function renderMemory(root: HTMLElement): void {
                 : ""
             }
           </div>
-          <p class="status">${status}</p>
+          <p class="status" aria-live="polite">${status}</p>
           ${
             done
               ? `<div class="overlay-card"><strong>Nice clear!</strong>${moves} moves in ${formatTime(seconds)}.</div>`
@@ -202,6 +211,8 @@ export function renderMemory(root: HTMLElement): void {
             sfx.win();
             burstAtElement(root.querySelector(".memory-grid"));
             announceUnlocks(checkMemoryClear(size === "large"));
+            pushHistory("Memory", `cleared ${size} in ${moves} moves`);
+            if (size === "normal") maybeCompleteDaily("memory", moves);
             if (
               !best ||
               moves < best.moves ||

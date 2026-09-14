@@ -1,0 +1,68 @@
+.reaction-arena {
+  margin-top: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: linear-gradient(160deg, #143038, #071418 70%);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.reaction-arena.wait {
+  border-color: rgba(255, 107, 74, 0.45);
+}
+
+.reaction-arena.go {
+  border-color: rgba(200, 245, 66, 0.55);
+  background: linear-gradient(160deg, #2a4a20, #0b1f24 75%);
+}
+
+.reaction-arena.result,
+.reaction-arena.false,
+.reaction-arena.match {
+  cursor: default;
+}
+
+.reaction-signal {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.reaction-sub {
+  margin: 0.45rem 0 0;
+  color: var(--mist);
+  font-size: 0.95rem;
+}
+
+.reaction-score {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.reaction-score .pill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: rgba(11, 31, 36, 0.5);
+  font-weight: 600;
+}
+
+@media (max-width: 719px) {
+  .reaction-arena {
+    min-height: 200px;
+    border-radius: 14px;
+  }
+}

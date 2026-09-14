@@ -16,6 +16,7 @@ describe("daily challenge", () => {
       "balloons",
       "mole",
       "reaction",
+      "flappy",
     ]).toContain(a.game);
   });
 

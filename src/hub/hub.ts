@@ -11,15 +11,20 @@ import {
 const games: Array<{
   route: Exclude<Route, "hub">;
   title: string;
+  tone: string;
 }> = [
-  { route: "snake", title: "Snake" },
-  { route: "tictactoe", title: "Tic-Tac-Toe" },
-  { route: "rps", title: "Rock Paper Scissors" },
-  { route: "memory", title: "Memory" },
+  { route: "snake", title: "Snake", tone: "tone-lime" },
+  { route: "breakout", title: "Breakout", tone: "tone-coral" },
+  { route: "balloons", title: "Balloon Pop", tone: "tone-teal" },
+  { route: "tictactoe", title: "Tic-Tac-Toe", tone: "tone-foam" },
+  { route: "rps", title: "Rock Paper Scissors", tone: "tone-mist" },
+  { route: "memory", title: "Memory", tone: "tone-lime" },
 ];
 
 const labels: Record<Exclude<Route, "hub">, string> = {
   snake: "Snake",
+  breakout: "Breakout",
+  balloons: "Balloon Pop",
   tictactoe: "Tic-Tac-Toe",
   rps: "Rock Paper Scissors",
   memory: "Memory",
@@ -32,25 +37,25 @@ export function renderHub(root: HTMLElement): void {
 
   root.innerHTML = `
     <div class="shell route-fade">
-      ${renderChrome({ showBack: false })}
+      ${renderChrome({ showBack: false, showBrand: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Pick a game!</p>
+        <p>Pick a game and play!</p>
         ${
           lastGame
-            ? `<div class="row" style="margin-top:1rem">
-                <button class="btn btn-primary" type="button" data-continue>Keep playing ${labels[lastGame]}</button>
+            ? `<div class="row hero-actions">
+                <button class="btn btn-ghost" type="button" data-continue>Continue</button>
               </div>`
             : ""
         }
       </header>
 
       <section class="panel daily-card" aria-label="Daily challenge">
-        <span class="daily-status">${dailyDone ? "Done for today" : "Today"}</span>
-        <h2>${daily.title}</h2>
+        <span class="daily-status">${dailyDone ? "Done for today" : "Today's quest"}</span>
+        <h2>${labels[daily.game]}</h2>
         <div class="row">
           <button class="btn ${dailyDone ? "btn-ghost" : "btn-primary"}" type="button" data-daily ${dailyDone ? "disabled" : ""}>
-            ${dailyDone ? "See you tomorrow" : "Play"}
+            ${dailyDone ? "Tomorrow" : "Play today's"}
           </button>
         </div>
       </section>
@@ -59,7 +64,7 @@ export function renderHub(root: HTMLElement): void {
         ${games
           .map(
             (game) => `
-          <button class="game-card" type="button" data-route="${game.route}">
+          <button class="game-card ${game.tone}" type="button" data-route="${game.route}">
             <h2>${game.title}</h2>
           </button>
         `,

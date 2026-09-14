@@ -51,7 +51,12 @@ export function collectStats(): PlayerStats {
     )[0] ?? null;
 
   return {
-    snakeBest: loadJson<number>("arcade-snake-best", 0),
+    snakeBest: Math.max(
+      loadJson<number>("arcade-snake-best", 0),
+      loadJson<number>("arcade-snake-best-chill", 0),
+      loadJson<number>("arcade-snake-best-normal", 0),
+      loadJson<number>("arcade-snake-best-insane", 0),
+    ),
     tttWins: ttt.wins,
     tttLosses: ttt.losses,
     tttDraws: ttt.draws,
@@ -74,6 +79,9 @@ export function hasAnyStats(stats: PlayerStats): boolean {
 export function clearAllProgress(): void {
   const keys = [
     "arcade-snake-best",
+    "arcade-snake-best-chill",
+    "arcade-snake-best-normal",
+    "arcade-snake-best-insane",
     "arcade-ttt-scores",
     "arcade-rps-stats",
     "arcade-memory-best-v2",
@@ -81,7 +89,7 @@ export function clearAllProgress(): void {
     "arcade-memory-best-normal",
     "arcade-memory-best-large",
   ];
-  for (const key of keys) saveJson(key, null);
+  for (const key of keys) removeJson(key);
   clearAchievements();
 }
 

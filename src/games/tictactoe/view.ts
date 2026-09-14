@@ -4,6 +4,7 @@ import { loadJson, saveJson } from "../../shared/storage";
 import { checkTttWin, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
+import { shareText } from "../../shared/share";
 import {
   aiPick,
   emptyBoard,
@@ -118,6 +119,11 @@ export function renderTicTacToe(root: HTMLElement): void {
           <p class="hint">Tip: keys 1–9 pick cells (top-left is 1).</p>
           <div class="row" style="margin-top: 1rem">
             <button class="btn btn-primary" type="button" data-reset>New game</button>
+            ${
+              winner
+                ? `<button class="btn btn-ghost" type="button" data-share>Share result</button>`
+                : ""
+            }
           </div>
         </section>
       </div>
@@ -131,6 +137,13 @@ export function renderTicTacToe(root: HTMLElement): void {
       turn = "X";
       locked = false;
       paint();
+    });
+
+    root.querySelector("[data-share]")?.addEventListener("click", () => {
+      void shareText(
+        "Arcade Hub Tic-Tac-Toe",
+        `Tic-Tac-Toe result: ${status} (${mode === "ai" ? `vs AI · ${difficulty}` : "vs friend"})`,
+      );
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((btn) => {

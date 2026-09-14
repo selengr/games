@@ -5,6 +5,7 @@ import { renderRps } from "./games/rps/view";
 import { renderMemory } from "./games/memory/view";
 import { renderSnake } from "./games/snake/view";
 import { parseRoute } from "./shared/router";
+import { registerOffline } from "./shared/offline";
 
 const rootEl = document.querySelector<HTMLDivElement>("#app");
 if (!rootEl) {
@@ -40,3 +41,4 @@ function render(): void {
 
 window.addEventListener("hashchange", render);
 render();
+registerOffline();

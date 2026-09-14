@@ -1,6 +1,7 @@
 import { setRoute, type Route } from "../shared/router";
 import { bindChrome, renderChrome } from "../shared/chrome";
 import { unlockAudio, sfx } from "../shared/audio";
+import { getSettings } from "../shared/settings";
 import {
   clearAllProgress,
   collectStats,
@@ -39,8 +40,16 @@ const games: Array<{
   },
 ];
 
+const labels: Record<Exclude<Route, "hub">, string> = {
+  snake: "Snake",
+  tictactoe: "Tic-Tac-Toe",
+  rps: "Rock Paper Scissors",
+  memory: "Memory Match",
+};
+
 export function renderHub(root: HTMLElement): void {
   const stats = collectStats();
+  const lastGame = getSettings().lastGame;
 
   root.innerHTML = `
     <div class="shell route-fade">
@@ -48,6 +57,13 @@ export function renderHub(root: HTMLElement): void {
       <header class="hero">
         <h1>Arcade Hub</h1>
         <p>Four browser games with sound, modes, badges, and local scores.</p>
+        ${
+          lastGame
+            ? `<div class="row" style="margin-top:1rem">
+                <button class="btn btn-primary" type="button" data-continue>Continue ${labels[lastGame]}</button>
+              </div>`
+            : ""
+        }
       </header>
       ${renderStatsBlock(stats)}
       <section class="game-grid" aria-label="Games">
@@ -68,6 +84,13 @@ export function renderHub(root: HTMLElement): void {
   `;
 
   bindChrome(root, () => renderHub(root));
+
+  root.querySelector("[data-continue]")?.addEventListener("click", () => {
+    if (!lastGame) return;
+    unlockAudio();
+    sfx.tap();
+    setRoute(lastGame);
+  });
 
   root.querySelector("[data-reset-all]")?.addEventListener("click", () => {
     if (!window.confirm("Reset all scores and badges on this device?")) return;

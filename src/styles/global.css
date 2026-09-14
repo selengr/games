@@ -334,6 +334,20 @@ a {
   background: radial-gradient(circle, rgba(155, 184, 176, 0.28), transparent 70%);
 }
 
+.game-card.tone-gold::after {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.32), transparent 70%);
+}
+
+.recent-plays {
+  margin-top: 1.5rem;
+}
+
+.recent-plays h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
 .daily-card h2 {
   font-size: clamp(1.4rem, 4vw, 1.85rem);
 }

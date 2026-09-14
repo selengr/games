@@ -1,0 +1,24 @@
+.breakout-wrap {
+  width: min(520px, 100%);
+}
+
+.breakout-canvas {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #071418;
+  touch-action: none;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 719px) {
+  .breakout-wrap {
+    width: min(100%, 94vw);
+  }
+
+  .breakout-canvas {
+    border-radius: 14px;
+  }
+}

@@ -48,6 +48,20 @@ a {
   padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 3rem;
 }
 
+@media (max-width: 719px) {
+  #app {
+    padding: 0.85rem 0.65rem 1.75rem;
+  }
+
+  .panel {
+    padding: 1rem 0.85rem 1.15rem;
+  }
+
+  .brand {
+    font-size: clamp(1.35rem, 6vw, 1.8rem);
+  }
+}
+
 .shell {
   width: min(1100px, 100%);
   margin: 0 auto;

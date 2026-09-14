@@ -25,20 +25,19 @@
   color: transparent;
   font-size: clamp(1.4rem, 5vw, 1.9rem);
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-  transform-style: preserve-3d;
+  transition: transform 0.2s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 .memory-card:hover:not(:disabled) {
-  transform: translateY(-2px);
   border-color: var(--teal);
+  transform: translateY(-2px);
 }
 
-.memory-card.flipped,
-.memory-card.matched {
+.memory-card.flipped {
   color: var(--foam);
   background: rgba(45, 212, 191, 0.18);
   border-color: rgba(45, 212, 191, 0.5);
+  animation: card-pop 0.28s ease;
 }
 
 .memory-card.matched {
@@ -46,4 +45,25 @@
   border-color: rgba(200, 245, 66, 0.55);
   color: var(--lime);
   cursor: default;
+  animation: card-pop 0.28s ease;
+}
+
+@keyframes card-pop {
+  from {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-card,
+  .memory-card.flipped,
+  .memory-card.matched {
+    transition: none;
+    animation: none;
+  }
 }

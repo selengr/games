@@ -1,3 +1,7 @@
+.ttt-panel {
+  width: min(520px, 100%);
+}
+
 .ttt-board {
   display: grid;
   grid-template-columns: repeat(3, minmax(88px, 1fr));
@@ -17,6 +21,8 @@
   font-weight: 800;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .ttt-cell:hover:not(:disabled) {
@@ -24,14 +30,19 @@
   transform: scale(1.03);
 }
 
+.ttt-cell:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
 .ttt-cell:disabled {
   cursor: default;
 }
 
 .ttt-cell.win {
-  background: rgba(200, 245, 66, 0.2);
+  background: rgba(200, 245, 66, 0.22);
   border-color: var(--lime);
   color: var(--lime);
+  box-shadow: 0 0 0 2px rgba(200, 245, 66, 0.25);
 }
 
 .ttt-cell.x {
@@ -40,6 +51,25 @@
 
 .ttt-cell.o {
   color: var(--coral);
+}
+
+.ttt-cell.pop {
+  animation: ttt-pop 0.28s ease;
+}
+
+.ttt-actions {
+  margin-top: 1rem;
+}
+
+@keyframes ttt-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 719px) {
@@ -52,5 +82,11 @@
   .ttt-cell {
     border-radius: 14px;
     font-size: clamp(2.2rem, 12vw, 3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ttt-cell.pop {
+    animation: none;
   }
 }

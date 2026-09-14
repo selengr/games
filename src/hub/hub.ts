@@ -11,14 +11,15 @@ import {
 const games: Array<{
   route: Exclude<Route, "hub">;
   title: string;
+  blurb: string;
   tone: string;
 }> = [
-  { route: "snake", title: "Snake", tone: "tone-lime" },
-  { route: "breakout", title: "Breakout", tone: "tone-coral" },
-  { route: "balloons", title: "Balloon Pop", tone: "tone-teal" },
-  { route: "tictactoe", title: "Tic-Tac-Toe", tone: "tone-foam" },
-  { route: "rps", title: "Rock Paper Scissors", tone: "tone-mist" },
-  { route: "memory", title: "Memory", tone: "tone-lime" },
+  { route: "snake", title: "Snake", blurb: "Grow fast. Don't bite yourself.", tone: "tone-lime" },
+  { route: "breakout", title: "Breakout", blurb: "Bounce the ball. Smash the wall.", tone: "tone-coral" },
+  { route: "balloons", title: "Balloon Pop", blurb: "Tap pops. Streaks score bigger.", tone: "tone-teal" },
+  { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
+  { route: "rps", title: "Rock Paper Scissors", blurb: "First to three wins.", tone: "tone-mist" },
+  { route: "memory", title: "Memory", blurb: "Flip cards. Match the pairs.", tone: "tone-lime" },
 ];
 
 const labels: Record<Exclude<Route, "hub">, string> = {
@@ -40,7 +41,7 @@ export function renderHub(root: HTMLElement): void {
       ${renderChrome({ showBack: false, showBrand: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Pick a game and play!</p>
+        <p>Six quick games. Pick one and play.</p>
         ${
           lastGame
             ? `<div class="row hero-actions">
@@ -66,6 +67,7 @@ export function renderHub(root: HTMLElement): void {
             (game) => `
           <button class="game-card ${game.tone}" type="button" data-route="${game.route}">
             <h2>${game.title}</h2>
+            <p>${game.blurb}</p>
           </button>
         `,
           )

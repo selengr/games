@@ -25,10 +25,7 @@ export function spawnBalloon(width: number, height: number): Balloon {
   };
 }
 
-export function stepBalloons(
-  balloons: Balloon[],
-  height: number,
-): { escaped: number } {
+export function stepBalloons(balloons: Balloon[]): { escaped: number } {
   let escaped = 0;
   for (const b of balloons) {
     if (!b.alive) continue;

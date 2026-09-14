@@ -27,6 +27,7 @@ const TITLES: Record<DailyGame, string> = {
   tictactoe: "Beat the AI",
   breakout: "Brick bash",
   balloons: "Pop party",
+  mole: "Mole frenzy",
 };
 
 export function todayKey(d = new Date()): string {
@@ -49,6 +50,7 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
     "tictactoe",
     "breakout",
     "balloons",
+    "mole",
   ];
   const idx = dayIndex(date) % games.length;
   const game = games[idx]!;
@@ -61,7 +63,9 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
           ? 1
           : game === "balloons"
             ? 12 + (dayIndex(date) % 10)
-            : 1;
+            : game === "mole"
+              ? 10 + (dayIndex(date) % 8)
+              : 1;
 
   const detail =
     game === "snake"
@@ -74,7 +78,9 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
             ? "Clear all bricks in one run."
             : game === "balloons"
               ? `Pop at least ${target} balloons.`
-              : "Win a round against the AI.";
+              : game === "mole"
+                ? `Score at least ${target} in Whack-a-Mole.`
+                : "Win a round against the AI.";
 
   return {
     date,
@@ -132,7 +138,10 @@ export function tryCompleteDaily(game: DailyGame, value: number): boolean {
     return false;
   }
   const ok =
-    game === "snake" || game === "balloons" || game === "breakout"
+    game === "snake" ||
+    game === "balloons" ||
+    game === "breakout" ||
+    game === "mole"
       ? value >= challenge.target
       : game === "memory"
         ? value <= challenge.target

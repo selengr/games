@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFlappy, flap, stepFlappy } from "./logic";
+import { createFlappy, flap, stepFlappy, FLAPPY_CONFIG } from "./logic";
 
 describe("flappy lite", () => {
   it("starts alive with an empty course", () => {
@@ -23,5 +23,12 @@ describe("flappy lite", () => {
     state.bird.vy = 8;
     expect(stepFlappy(state)).toBe("die");
     expect(state.alive).toBe(false);
+  });
+
+  it("uses tighter gaps on hard", () => {
+    expect(FLAPPY_CONFIG.hard.pipeGap).toBeLessThan(FLAPPY_CONFIG.easy.pipeGap);
+    expect(FLAPPY_CONFIG.hard.pipeSpeed).toBeGreaterThan(
+      FLAPPY_CONFIG.easy.pipeSpeed,
+    );
   });
 });

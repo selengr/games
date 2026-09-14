@@ -1,8 +1,8 @@
 .memory-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(56px, 1fr));
-  gap: 0.65rem;
-  width: min(420px, 100%);
+  grid-template-columns: repeat(4, minmax(64px, 1fr));
+  gap: 0.7rem;
+  width: min(480px, 100%);
   margin: 1rem 0;
 }
 
@@ -20,10 +20,10 @@
 .memory-card {
   aspect-ratio: 1;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 16px;
   background: linear-gradient(145deg, rgba(20, 48, 56, 0.95), rgba(11, 31, 36, 0.9));
   color: transparent;
-  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-size: clamp(1.5rem, 5.5vw, 2.1rem);
   cursor: pointer;
   transition: transform 0.2s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
@@ -56,6 +56,19 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@media (max-width: 719px) {
+  .memory-grid {
+    width: min(100%, 94vw);
+    gap: 0.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .memory-card {
+    border-radius: 12px;
+    font-size: clamp(1.35rem, 7vw, 1.9rem);
   }
 }
 

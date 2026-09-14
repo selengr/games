@@ -76,6 +76,21 @@
   color: var(--teal);
 }
 
+.rps-side .big.pop {
+  animation: rps-pop 0.28s ease;
+}
+
+@keyframes rps-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0.45;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .rps-vs {
   font-family: var(--font-display);
   font-weight: 800;

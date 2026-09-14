@@ -10,7 +10,6 @@ export type AchievementId =
   | "snake_25"
   | "ttt_win"
   | "ttt_hard"
-  | "rps_streak"
   | "memory_clear"
   | "memory_large"
   | "tour_all"
@@ -33,7 +32,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "snake_25", title: "Snake boss", detail: "Reach 25 in Snake" },
   { id: "ttt_win", title: "Outsmarted", detail: "Beat the Tic-Tac-Toe AI" },
   { id: "ttt_hard", title: "No mercy", detail: "Beat hard-mode AI" },
-  { id: "rps_streak", title: "On a roll", detail: "Hit a 5-win RPS streak" },
   { id: "memory_clear", title: "Sharp mind", detail: "Clear a Memory board" },
   { id: "memory_large", title: "Full house", detail: "Clear the large Memory board" },
   { id: "breakout_clear", title: "Brick breaker", detail: "Clear a Breakout level" },
@@ -71,7 +69,6 @@ export function markPlayed(
   game:
     | "snake"
     | "tictactoe"
-    | "rps"
     | "memory"
     | "breakout"
     | "balloons"
@@ -86,7 +83,6 @@ export function markPlayed(
   if (
     played.snake &&
     played.tictactoe &&
-    played.rps &&
     played.memory &&
     played.breakout &&
     played.balloons &&
@@ -116,11 +112,6 @@ export function checkTttWin(hard: boolean): AchievementId[] {
   if (unlock("ttt_win")) got.push("ttt_win");
   if (hard && unlock("ttt_hard")) got.push("ttt_hard");
   return got;
-}
-
-export function checkRpsStreak(streak: number): AchievementId[] {
-  if (streak >= 5 && unlock("rps_streak")) return ["rps_streak"];
-  return [];
 }
 
 export function checkMemoryClear(large: boolean): AchievementId[] {

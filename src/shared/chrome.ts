@@ -59,6 +59,11 @@ export function bindChrome(
   });
 
   root.querySelector<HTMLInputElement>("[data-volume]")?.addEventListener("input", (e) => {
+    const value = Number((e.target as HTMLInputElement).value) / 100;
+    setVolume(value);
+  });
+
+  root.querySelector<HTMLInputElement>("[data-volume]")?.addEventListener("change", (e) => {
     unlockAudio();
     const value = Number((e.target as HTMLInputElement).value) / 100;
     setVolume(value);

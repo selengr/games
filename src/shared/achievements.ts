@@ -1,4 +1,5 @@
 import { loadJson, saveJson } from "./storage";
+import { setLastGame } from "./settings";
 
 const KEY = "arcade-achievements";
 const PLAYED_KEY = "arcade-played";
@@ -55,6 +56,7 @@ export function unlock(id: AchievementId): boolean {
 }
 
 export function markPlayed(game: "snake" | "tictactoe" | "rps" | "memory"): void {
+  setLastGame(game);
   const played = loadJson<Record<string, boolean>>(PLAYED_KEY, {});
   played[game] = true;
   saveJson(PLAYED_KEY, played);

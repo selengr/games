@@ -1,6 +1,9 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
+import { checkTttWin, markPlayed } from "../../shared/achievements";
+import { announceUnlocks } from "../../shared/toast";
+import { burstAtElement } from "../../shared/fx";
 import {
   aiPick,
   emptyBoard,
@@ -17,6 +20,7 @@ type Mode = "ai" | "friend";
 const SCORE_KEY = "arcade-ttt-scores";
 
 export function renderTicTacToe(root: HTMLElement): void {
+  markPlayed("tictactoe");
   let board: Board = emptyBoard();
   let difficulty: Difficulty = "medium";
   let mode: Mode = "ai";
@@ -46,7 +50,7 @@ export function renderTicTacToe(root: HTMLElement): void {
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true })}
+        ${renderChrome({ showBack: true, helpGame: "tictactoe" })}
         <section class="panel">
           <h2>Tic-Tac-Toe</h2>
           <p class="muted">${
@@ -119,7 +123,7 @@ export function renderTicTacToe(root: HTMLElement): void {
       </div>
     `;
 
-    bindChrome(root, paint);
+    bindChrome(root, paint, "tictactoe");
 
     root.querySelector("[data-reset]")?.addEventListener("click", () => {
       sfx.tap();
@@ -163,6 +167,8 @@ export function renderTicTacToe(root: HTMLElement): void {
     if (result === "X") {
       scores.wins += 1;
       sfx.win();
+      burstAtElement(root.querySelector(".ttt-board"));
+      announceUnlocks(checkTttWin(difficulty === "hard"));
     } else if (result === "O") {
       scores.losses += 1;
       sfx.lose();
@@ -180,8 +186,10 @@ export function renderTicTacToe(root: HTMLElement): void {
       board[i] = turn;
       sfx.place();
       const result = getWinner(board);
-      if (result === "X" || result === "O") sfx.win();
-      else if (result === "draw") sfx.draw();
+      if (result === "X" || result === "O") {
+        sfx.win();
+        burstAtElement(root.querySelector(".ttt-board"));
+      } else if (result === "draw") sfx.draw();
       else turn = turn === "X" ? "O" : "X";
       paint();
       return;

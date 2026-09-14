@@ -172,13 +172,23 @@ export function renderBreakout(root: HTMLElement): void {
     movePaddle(state, x);
   };
 
+  let dragging = false;
+
   canvas?.addEventListener("pointerdown", (e) => {
     unlockAudio();
+    dragging = true;
     canvas.setPointerCapture(e.pointerId);
     pointer(e.clientX);
   });
   canvas?.addEventListener("pointermove", (e) => {
-    if (e.buttons || e.pressure > 0) pointer(e.clientX);
+    if (!dragging) return;
+    pointer(e.clientX);
+  });
+  canvas?.addEventListener("pointerup", () => {
+    dragging = false;
+  });
+  canvas?.addEventListener("pointercancel", () => {
+    dragging = false;
   });
 
   againBtn?.addEventListener("click", () => {

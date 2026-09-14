@@ -1,19 +1,21 @@
 .rps-choices {
   display: grid;
-  grid-template-columns: repeat(3, minmax(90px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(96px, 1fr));
+  gap: 0.85rem;
   margin: 1rem 0;
+  width: min(480px, 100%);
 }
 
 .rps-btn {
   appearance: none;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(11, 31, 36, 0.55);
   color: var(--foam);
-  padding: 1rem 0.5rem;
+  padding: 1.15rem 0.55rem;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.2s ease;
+  min-height: 6.5rem;
 }
 
 .rps-btn:hover {
@@ -24,22 +26,22 @@
 .rps-btn .glyph {
   display: grid;
   place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 3rem;
+  height: 3rem;
   margin: 0 auto;
   border-radius: 50%;
   border: 1px solid var(--line);
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: var(--lime);
 }
 
 .rps-btn .name {
   display: block;
-  margin-top: 0.35rem;
+  margin-top: 0.45rem;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .rps-arena {
@@ -49,26 +51,27 @@
   align-items: center;
   margin: 1rem 0;
   text-align: center;
+  width: min(480px, 100%);
 }
 
 .rps-side {
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 1rem 0.75rem;
+  padding: 1.1rem 0.75rem;
   background: rgba(11, 31, 36, 0.4);
-  min-height: 110px;
+  min-height: 120px;
 }
 
 .rps-side .big {
   display: grid;
   place-items: center;
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 3.6rem;
+  height: 3.6rem;
   margin: 0 auto 0.35rem;
   border-radius: 50%;
   border: 1px solid var(--line);
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--teal);
 }
@@ -77,4 +80,22 @@
   font-family: var(--font-display);
   font-weight: 800;
   color: var(--mist);
+}
+
+@media (max-width: 719px) {
+  .rps-choices,
+  .rps-arena {
+    width: min(100%, 94vw);
+  }
+
+  .rps-btn {
+    min-height: 7rem;
+    padding: 1.25rem 0.4rem;
+  }
+
+  .rps-btn .glyph {
+    width: 3.4rem;
+    height: 3.4rem;
+    font-size: 1.45rem;
+  }
 }

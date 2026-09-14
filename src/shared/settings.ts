@@ -33,7 +33,8 @@ export function getSettings(): Settings {
     raw.lastGame === "rps" ||
     raw.lastGame === "memory" ||
     raw.lastGame === "breakout" ||
-    raw.lastGame === "balloons"
+    raw.lastGame === "balloons" ||
+    raw.lastGame === "mole"
       ? raw.lastGame
       : null;
 

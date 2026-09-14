@@ -9,7 +9,13 @@ type Particle = {
 
 const COLORS = ["#c8f542", "#2dd4bf", "#ff6b4a", "#e8f4f1"];
 
+function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function burst(x: number, y: number, count = 18): void {
+  if (reducedMotion()) return;
+
   const canvas = document.createElement("canvas");
   canvas.className = "fx-layer";
   canvas.width = window.innerWidth;

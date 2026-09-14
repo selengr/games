@@ -1,6 +1,9 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
+import { checkMemoryClear, markPlayed } from "../../shared/achievements";
+import { announceUnlocks } from "../../shared/toast";
+import { burstAtElement } from "../../shared/fx";
 import {
   allMatched,
   columnsFor,
@@ -24,6 +27,7 @@ function formatTime(total: number): string {
 }
 
 export function renderMemory(root: HTMLElement): void {
+  markPlayed("memory");
   let size: BoardSize = "normal";
   let cards: Card[] = createDeck(size);
   let flipped: number[] = [];
@@ -72,7 +76,7 @@ export function renderMemory(root: HTMLElement): void {
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true })}
+        ${renderChrome({ showBack: true, helpGame: "memory" })}
         <section class="panel">
           <h2>Memory Match</h2>
           <p class="muted">${pairCount(size)} pairs. Timer starts on your first flip.</p>
@@ -131,7 +135,7 @@ export function renderMemory(root: HTMLElement): void {
       </div>
     `;
 
-    bindChrome(root, paint);
+    bindChrome(root, paint, "memory");
 
     root.querySelectorAll<HTMLButtonElement>("[data-size]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -176,6 +180,8 @@ export function renderMemory(root: HTMLElement): void {
           if (allMatched(cards)) {
             stopTimer();
             sfx.win();
+            burstAtElement(root.querySelector(".memory-grid"));
+            announceUnlocks(checkMemoryClear(size === "large"));
             if (
               !best ||
               moves < best.moves ||

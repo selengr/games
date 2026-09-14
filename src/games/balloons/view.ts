@@ -127,7 +127,7 @@ export function renderBalloons(root: HTMLElement): void {
       balloons.push(spawnBalloon(canvas.width, canvas.height));
     }
 
-    const { escaped } = stepBalloons(balloons, canvas.height);
+    const { escaped } = stepBalloons(balloons);
     if (escaped > 0) {
       lives -= escaped;
       sfx.lose();

@@ -4,6 +4,8 @@ import { renderTicTacToe } from "./games/tictactoe/view";
 import { renderRps } from "./games/rps/view";
 import { renderMemory } from "./games/memory/view";
 import { renderSnake } from "./games/snake/view";
+import { renderBreakout } from "./games/breakout/view";
+import { renderBalloons } from "./games/balloons/view";
 import { parseRoute } from "./shared/router";
 import { registerOffline } from "./shared/offline";
 
@@ -17,6 +19,8 @@ type CleanupHost = HTMLElement & {
   __snakeCleanup?: () => void;
   __tttCleanup?: () => void;
   __memoryCleanup?: () => void;
+  __breakoutCleanup?: () => void;
+  __balloonsCleanup?: () => void;
 };
 
 function cleanup(): void {
@@ -24,15 +28,21 @@ function cleanup(): void {
   host.__snakeCleanup?.();
   host.__tttCleanup?.();
   host.__memoryCleanup?.();
+  host.__breakoutCleanup?.();
+  host.__balloonsCleanup?.();
   host.__snakeCleanup = undefined;
   host.__tttCleanup = undefined;
   host.__memoryCleanup = undefined;
+  host.__breakoutCleanup = undefined;
+  host.__balloonsCleanup = undefined;
 }
 
 function render(): void {
   cleanup();
   const route = parseRoute(window.location.hash);
   if (route === "snake") renderSnake(app);
+  else if (route === "breakout") renderBreakout(app);
+  else if (route === "balloons") renderBalloons(app);
   else if (route === "tictactoe") renderTicTacToe(app);
   else if (route === "rps") renderRps(app);
   else if (route === "memory") renderMemory(app);

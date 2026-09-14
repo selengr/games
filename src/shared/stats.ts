@@ -91,6 +91,9 @@ export function clearAllProgress(): void {
   ];
   for (const key of keys) removeJson(key);
   clearAchievements();
+  removeJson("arcade-history");
+  removeJson("arcade-daily");
+  removeJson("arcade-daily-active");
 }
 
 function formatTime(total: number): string {

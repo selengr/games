@@ -295,6 +295,51 @@ a {
   background: rgba(11, 31, 36, 0.5);
 }
 
+.daily-card {
+  margin: 0 0 1.5rem;
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.12), rgba(20, 48, 56, 0.7));
+}
+
+.daily-card .daily-status {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.history-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.history-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  background: rgba(11, 31, 36, 0.4);
+  font-size: 0.9rem;
+}
+
+.history-list .when {
+  color: var(--mist);
+  white-space: nowrap;
+}
+
+.install-tip {
+  margin-top: 1.25rem;
+  color: var(--mist);
+  font-size: 0.88rem;
+}
+
 .hero {
   margin-bottom: 2.5rem;
   animation: rise 0.7s ease both;

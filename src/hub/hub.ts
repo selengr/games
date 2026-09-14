@@ -3,6 +3,12 @@ import { bindChrome, renderChrome } from "../shared/chrome";
 import { unlockAudio, sfx } from "../shared/audio";
 import { getSettings } from "../shared/settings";
 import {
+  getDailyChallenge,
+  isDailyDone,
+  startDailyRun,
+} from "../shared/daily";
+import { formatWhen, getHistory } from "../shared/history";
+import {
   clearAllProgress,
   collectStats,
   renderStatsBlock,
@@ -50,6 +56,9 @@ const labels: Record<Exclude<Route, "hub">, string> = {
 export function renderHub(root: HTMLElement): void {
   const stats = collectStats();
   const lastGame = getSettings().lastGame;
+  const daily = getDailyChallenge();
+  const dailyDone = isDailyDone();
+  const history = getHistory();
 
   root.innerHTML = `
     <div class="shell route-fade">
@@ -65,7 +74,41 @@ export function renderHub(root: HTMLElement): void {
             : ""
         }
       </header>
+
+      <section class="panel daily-card" aria-label="Daily challenge">
+        <span class="daily-status">${dailyDone ? "Completed today" : "Today's challenge"}</span>
+        <h2>${daily.title}</h2>
+        <p class="muted">${daily.detail}</p>
+        <div class="row">
+          <button class="btn ${dailyDone ? "btn-ghost" : "btn-primary"}" type="button" data-daily ${dailyDone ? "disabled" : ""}>
+            ${dailyDone ? "Come back tomorrow" : `Play ${labels[daily.game]}`}
+          </button>
+        </div>
+      </section>
+
       ${renderStatsBlock(stats)}
+
+      ${
+        history.length
+          ? `<section class="panel stats-panel" aria-label="Recent plays">
+              <h2>Recent plays</h2>
+              <p class="muted">Last sessions on this device.</p>
+              <ul class="history-list">
+                ${history
+                  .map(
+                    (h) => `
+                  <li>
+                    <span><strong>${h.game}</strong> · ${h.summary}</span>
+                    <span class="when">${formatWhen(h.at)}</span>
+                  </li>
+                `,
+                  )
+                  .join("")}
+              </ul>
+            </section>`
+          : ""
+      }
+
       <section class="game-grid" aria-label="Games">
         ${games
           .map(
@@ -80,6 +123,7 @@ export function renderHub(root: HTMLElement): void {
           .join("")}
       </section>
       <p class="hub-footer">Tip: open Help inside a game. Snake likes arrow keys or <kbd>WASD</kbd>.</p>
+      <p class="install-tip">On phone: use browser Share / Add to Home Screen for an app-like shortcut.</p>
     </div>
   `;
 
@@ -90,6 +134,14 @@ export function renderHub(root: HTMLElement): void {
     unlockAudio();
     sfx.tap();
     setRoute(lastGame);
+  });
+
+  root.querySelector("[data-daily]")?.addEventListener("click", () => {
+    if (dailyDone) return;
+    unlockAudio();
+    sfx.tap();
+    startDailyRun();
+    setRoute(daily.game);
   });
 
   root.querySelector("[data-reset-all]")?.addEventListener("click", () => {

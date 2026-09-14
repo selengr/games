@@ -7,6 +7,7 @@ import { renderSnake } from "./games/snake/view";
 import { renderBreakout } from "./games/breakout/view";
 import { renderBalloons } from "./games/balloons/view";
 import { renderMole } from "./games/mole/view";
+import { renderReaction } from "./games/reaction/view";
 import { parseRoute } from "./shared/router";
 import { registerOffline } from "./shared/offline";
 
@@ -23,6 +24,7 @@ type CleanupHost = HTMLElement & {
   __breakoutCleanup?: () => void;
   __balloonsCleanup?: () => void;
   __moleCleanup?: () => void;
+  __reactionCleanup?: () => void;
 };
 
 function cleanup(): void {
@@ -33,12 +35,14 @@ function cleanup(): void {
   host.__breakoutCleanup?.();
   host.__balloonsCleanup?.();
   host.__moleCleanup?.();
+  host.__reactionCleanup?.();
   host.__snakeCleanup = undefined;
   host.__tttCleanup = undefined;
   host.__memoryCleanup = undefined;
   host.__breakoutCleanup = undefined;
   host.__balloonsCleanup = undefined;
   host.__moleCleanup = undefined;
+  host.__reactionCleanup = undefined;
 }
 
 function render(): void {
@@ -48,6 +52,7 @@ function render(): void {
   else if (route === "breakout") renderBreakout(app);
   else if (route === "balloons") renderBalloons(app);
   else if (route === "mole") renderMole(app);
+  else if (route === "reaction") renderReaction(app);
   else if (route === "tictactoe") renderTicTacToe(app);
   else if (route === "rps") renderRps(app);
   else if (route === "memory") renderMemory(app);

@@ -38,17 +38,22 @@ export function stepBalloons(balloons: Balloon[]): { escaped: number } {
   return { escaped };
 }
 
+/** Extra tap radius so fat-finger taps still count on phones. */
+export const HIT_PAD = 14;
+
 export function hitBalloon(
   balloons: Balloon[],
   x: number,
   y: number,
+  pad = HIT_PAD,
 ): Balloon | null {
   for (let i = balloons.length - 1; i >= 0; i -= 1) {
     const b = balloons[i]!;
     if (!b.alive) continue;
     const dx = b.x - x;
     const dy = b.y - y;
-    if (dx * dx + dy * dy <= b.r * b.r) {
+    const reach = b.r + pad;
+    if (dx * dx + dy * dy <= reach * reach) {
       b.alive = false;
       return b;
     }

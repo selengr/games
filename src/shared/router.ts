@@ -1,6 +1,21 @@
-export type Route = "hub" | "tictactoe" | "rps" | "memory" | "snake";
+export type Route =
+  | "hub"
+  | "tictactoe"
+  | "rps"
+  | "memory"
+  | "snake"
+  | "breakout"
+  | "balloons";
 
-const routes: Route[] = ["hub", "tictactoe", "rps", "memory", "snake"];
+const routes: Route[] = [
+  "hub",
+  "tictactoe",
+  "rps",
+  "memory",
+  "snake",
+  "breakout",
+  "balloons",
+];
 
 export function parseRoute(hash: string): Route {
   const value = hash.replace(/^#\/?/, "").toLowerCase();

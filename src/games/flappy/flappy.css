@@ -2,6 +2,11 @@
   width: min(420px, 100%);
 }
 
+.flappy-diffs {
+  margin: 0.65rem 0 0.85rem;
+  flex-wrap: wrap;
+}
+
 .flappy-canvas {
   width: 100%;
   aspect-ratio: 2 / 3;

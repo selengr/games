@@ -9,9 +9,11 @@
   border-radius: 16px;
   border: 1px solid var(--line);
   background: linear-gradient(180deg, #102a30 0%, #071418 100%);
-  touch-action: manipulation;
+  touch-action: none;
   box-shadow: var(--shadow);
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 @media (max-width: 719px) {

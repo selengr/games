@@ -17,7 +17,8 @@ export type AchievementId =
   | "daily_clear"
   | "breakout_clear"
   | "balloons_20"
-  | "mole_15";
+  | "mole_15"
+  | "reaction_win";
 
 export type Achievement = {
   id: AchievementId;
@@ -37,6 +38,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "breakout_clear", title: "Brick breaker", detail: "Clear a Breakout level" },
   { id: "balloons_20", title: "Pop star", detail: "Pop 20 balloons in one run" },
   { id: "mole_15", title: "Quick hands", detail: "Score 15 in Whack-a-Mole" },
+  { id: "reaction_win", title: "Lightning", detail: "Win a Reaction Duel match" },
   { id: "tour_all", title: "Tour complete", detail: "Open every game once" },
   { id: "daily_clear", title: "Daily grind", detail: "Finish today's challenge" },
 ];
@@ -71,7 +73,8 @@ export function markPlayed(
     | "memory"
     | "breakout"
     | "balloons"
-    | "mole",
+    | "mole"
+    | "reaction",
 ): void {
   setLastGame(game);
   const played = loadJson<Record<string, boolean>>(PLAYED_KEY, {});
@@ -84,7 +87,8 @@ export function markPlayed(
     played.memory &&
     played.breakout &&
     played.balloons &&
-    played.mole
+    played.mole &&
+    played.reaction
   ) {
     unlock("tour_all");
   }
@@ -134,5 +138,10 @@ export function checkBalloonsScore(score: number): AchievementId[] {
 
 export function checkMoleScore(score: number): AchievementId[] {
   if (score >= 15 && unlock("mole_15")) return ["mole_15"];
+  return [];
+}
+
+export function checkReactionWin(): AchievementId[] {
+  if (unlock("reaction_win")) return ["reaction_win"];
   return [];
 }

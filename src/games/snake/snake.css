@@ -17,10 +17,10 @@
 
 .snake-pad {
   display: grid;
-  grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(3, 56px);
-  gap: 0.4rem;
-  margin-top: 0.25rem;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(3, 64px);
+  gap: 0.45rem;
+  margin-top: 0.5rem;
 }
 
 .snake-pad .btn {

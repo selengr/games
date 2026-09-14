@@ -79,7 +79,7 @@ a {
   background: var(--panel);
   color: var(--foam);
   border-radius: 999px;
-  padding: 0.55rem 1rem;
+  padding: 0.75rem 1.2rem;
   cursor: pointer;
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
@@ -102,9 +102,9 @@ a {
   background: rgba(11, 31, 36, 0.55);
   color: var(--foam);
   border-radius: 999px;
-  padding: 0.55rem 0.9rem;
+  padding: 0.75rem 1.05rem;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
@@ -374,13 +374,20 @@ a {
   border-radius: var(--radius);
   background: var(--panel);
   backdrop-filter: blur(12px);
-  padding: 1.4rem 1.35rem 1.5rem;
-  text-align: left;
+  padding: 1.8rem 1.35rem;
+  text-align: center;
   color: inherit;
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   animation: rise 0.7s ease both;
+  min-height: 110px;
+}
+
+.game-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  margin: 0;
 }
 
 .game-card:nth-child(2) {
@@ -406,27 +413,6 @@ a {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(45, 212, 191, 0.25), transparent 70%);
   pointer-events: none;
-}
-
-.game-card h2 {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  margin: 0 0 0.45rem;
-}
-
-.game-card p {
-  margin: 0;
-  color: var(--mist);
-  font-size: 0.95rem;
-}
-
-.tag {
-  display: inline-block;
-  margin-bottom: 0.85rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--lime);
 }
 
 .panel {
@@ -461,8 +447,9 @@ a {
   appearance: none;
   border: none;
   border-radius: 999px;
-  padding: 0.65rem 1.15rem;
+  padding: 0.85rem 1.35rem;
   font-weight: 600;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
 }

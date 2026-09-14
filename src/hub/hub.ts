@@ -7,6 +7,7 @@ import {
   isDailyDone,
   startDailyRun,
 } from "../shared/daily";
+import { formatWhen, getHistory } from "../shared/history";
 
 const games: Array<{
   route: Exclude<Route, "hub">;
@@ -17,6 +18,7 @@ const games: Array<{
   { route: "snake", title: "Snake", blurb: "Grow fast. Don't bite yourself.", tone: "tone-lime" },
   { route: "breakout", title: "Breakout", blurb: "Bounce the ball. Smash the wall.", tone: "tone-coral" },
   { route: "balloons", title: "Balloon Pop", blurb: "Tap pops. Streaks score bigger.", tone: "tone-teal" },
+  { route: "mole", title: "Whack-a-Mole", blurb: "Hit moles before they hide.", tone: "tone-gold" },
   { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
   { route: "rps", title: "Rock Paper Scissors", blurb: "First to three wins.", tone: "tone-mist" },
   { route: "memory", title: "Memory", blurb: "Flip cards. Match the pairs.", tone: "tone-lime" },
@@ -26,6 +28,7 @@ const labels: Record<Exclude<Route, "hub">, string> = {
   snake: "Snake",
   breakout: "Breakout",
   balloons: "Balloon Pop",
+  mole: "Whack-a-Mole",
   tictactoe: "Tic-Tac-Toe",
   rps: "Rock Paper Scissors",
   memory: "Memory",
@@ -35,13 +38,14 @@ export function renderHub(root: HTMLElement): void {
   const lastGame = getSettings().lastGame;
   const daily = getDailyChallenge();
   const dailyDone = isDailyDone();
+  const recent = getHistory().slice(0, 5);
 
   root.innerHTML = `
     <div class="shell route-fade">
       ${renderChrome({ showBack: false, showBrand: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Six quick games. Pick one and play.</p>
+        <p>Seven quick games. Pick one and play.</p>
         ${
           lastGame
             ? `<div class="row hero-actions">
@@ -54,6 +58,7 @@ export function renderHub(root: HTMLElement): void {
       <section class="panel daily-card" aria-label="Daily challenge">
         <span class="daily-status">${dailyDone ? "Done for today" : "Today's quest"}</span>
         <h2>${labels[daily.game]}</h2>
+        <p class="hint">${daily.detail}</p>
         <div class="row">
           <button class="btn ${dailyDone ? "btn-ghost" : "btn-primary"}" type="button" data-daily ${dailyDone ? "disabled" : ""}>
             ${dailyDone ? "Tomorrow" : "Play today's"}
@@ -73,6 +78,25 @@ export function renderHub(root: HTMLElement): void {
           )
           .join("")}
       </section>
+
+      ${
+        recent.length
+          ? `<section class="panel recent-plays" aria-label="Recent plays">
+              <h2>Recent plays</h2>
+              <ul class="history-list">
+                ${recent
+                  .map(
+                    (entry) => `
+                  <li>
+                    <span><strong>${entry.game}</strong> · ${entry.summary}</span>
+                    <span class="when">${formatWhen(entry.at)}</span>
+                  </li>`,
+                  )
+                  .join("")}
+              </ul>
+            </section>`
+          : ""
+      }
     </div>
   `;
 

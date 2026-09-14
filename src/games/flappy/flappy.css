@@ -1,0 +1,27 @@
+.flappy-wrap {
+  width: min(420px, 100%);
+}
+
+.flappy-canvas {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #1a3a42 0%, #0b1f24 70%, #143038 100%);
+  touch-action: none;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (max-width: 719px) {
+  .flappy-wrap {
+    width: min(100%, 94vw);
+  }
+
+  .flappy-canvas {
+    border-radius: 14px;
+  }
+}

@@ -7,7 +7,8 @@ export type Route =
   | "breakout"
   | "balloons"
   | "mole"
-  | "reaction";
+  | "reaction"
+  | "flappy";
 
 const routes: Route[] = [
   "hub",
@@ -19,6 +20,7 @@ const routes: Route[] = [
   "balloons",
   "mole",
   "reaction",
+  "flappy",
 ];
 
 export function parseRoute(hash: string): Route {

@@ -433,6 +433,15 @@ a {
   margin: 0;
 }
 
+.game-card p {
+  margin: 0.55rem 0 0;
+  color: var(--mist);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  max-width: 22ch;
+  margin-inline: auto;
+}
+
 .game-card:nth-child(2) {
   animation-delay: 0.08s;
 }

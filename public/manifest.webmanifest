@@ -1,7 +1,7 @@
 {
   "name": "Arcade Hub",
   "short_name": "Arcade",
-  "description": "Browser arcade with Snake, Tic-Tac-Toe, RPS, and Memory Match.",
+  "description": "Nine quick browser games — Snake, Flappy Lite, Breakout, and more.",
   "start_url": "/arcade-hub/",
   "display": "standalone",
   "background_color": "#0b1f24",

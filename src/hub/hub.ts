@@ -20,6 +20,7 @@ const games: Array<{
   { route: "breakout", title: "Breakout", blurb: "Bounce the ball. Smash the wall.", tone: "tone-coral" },
   { route: "balloons", title: "Balloon Pop", blurb: "Tap pops. Streaks score bigger.", tone: "tone-teal" },
   { route: "mole", title: "Whack-a-Mole", blurb: "Hit moles before they hide.", tone: "tone-gold" },
+  { route: "reaction", title: "Reaction Duel", blurb: "Wait for GO. Beat the rival.", tone: "tone-coral" },
   { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
   { route: "rps", title: "Rock Paper Scissors", blurb: "First to three wins.", tone: "tone-mist" },
   { route: "memory", title: "Memory", blurb: "Flip cards. Match the pairs.", tone: "tone-lime" },
@@ -30,6 +31,7 @@ const labels: Record<Exclude<Route, "hub">, string> = {
   breakout: "Breakout",
   balloons: "Balloon Pop",
   mole: "Whack-a-Mole",
+  reaction: "Reaction Duel",
   tictactoe: "Tic-Tac-Toe",
   rps: "Rock Paper Scissors",
   memory: "Memory",
@@ -81,7 +83,7 @@ export function renderHub(root: HTMLElement): void {
       ${renderChrome({ showBack: false, showBrand: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Seven quick games. Pick one and play.</p>
+        <p>Eight quick games. Pick one and play.</p>
         ${
           lastGame
             ? `<div class="row hero-actions">

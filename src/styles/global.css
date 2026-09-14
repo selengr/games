@@ -301,12 +301,41 @@ a {
   font-size: 0.9rem;
 }
 
-.hub-footer kbd {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.1rem 0.35rem;
-  font-size: 0.8rem;
-  background: rgba(11, 31, 36, 0.5);
+.brand-bar-slim {
+  margin-bottom: 0.75rem;
+}
+
+.brand-spacer {
+  display: block;
+  min-height: 1px;
+}
+
+.hero-actions {
+  margin-top: 1rem;
+}
+
+.game-card.tone-lime::after {
+  background: radial-gradient(circle, rgba(200, 245, 66, 0.28), transparent 70%);
+}
+
+.game-card.tone-coral::after {
+  background: radial-gradient(circle, rgba(255, 107, 74, 0.3), transparent 70%);
+}
+
+.game-card.tone-teal::after {
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.3), transparent 70%);
+}
+
+.game-card.tone-foam::after {
+  background: radial-gradient(circle, rgba(232, 244, 241, 0.22), transparent 70%);
+}
+
+.game-card.tone-mist::after {
+  background: radial-gradient(circle, rgba(155, 184, 176, 0.28), transparent 70%);
+}
+
+.daily-card h2 {
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
 }
 
 .daily-card {

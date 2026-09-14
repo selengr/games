@@ -34,7 +34,8 @@ export function getSettings(): Settings {
     raw.lastGame === "memory" ||
     raw.lastGame === "breakout" ||
     raw.lastGame === "balloons" ||
-    raw.lastGame === "mole"
+    raw.lastGame === "mole" ||
+    raw.lastGame === "reaction"
       ? raw.lastGame
       : null;
 

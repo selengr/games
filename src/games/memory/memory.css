@@ -37,7 +37,6 @@
   color: var(--foam);
   background: rgba(45, 212, 191, 0.18);
   border-color: rgba(45, 212, 191, 0.5);
-  animation: card-pop 0.28s ease;
 }
 
 .memory-card.matched {
@@ -45,6 +44,9 @@
   border-color: rgba(200, 245, 66, 0.55);
   color: var(--lime);
   cursor: default;
+}
+
+.memory-card.pop {
   animation: card-pop 0.28s ease;
 }
 
@@ -75,7 +77,8 @@
 @media (prefers-reduced-motion: reduce) {
   .memory-card,
   .memory-card.flipped,
-  .memory-card.matched {
+  .memory-card.matched,
+  .memory-card.pop {
     transition: none;
     animation: none;
   }

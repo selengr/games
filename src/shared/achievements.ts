@@ -13,7 +13,8 @@ export type AchievementId =
   | "rps_streak"
   | "memory_clear"
   | "memory_large"
-  | "tour_all";
+  | "tour_all"
+  | "daily_clear";
 
 export type Achievement = {
   id: AchievementId;
@@ -31,6 +32,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "memory_clear", title: "Sharp mind", detail: "Clear a Memory board" },
   { id: "memory_large", title: "Full house", detail: "Clear the large Memory board" },
   { id: "tour_all", title: "Tour complete", detail: "Open every game once" },
+  { id: "daily_clear", title: "Daily grind", detail: "Finish today's challenge" },
 ];
 
 type Store = Partial<Record<AchievementId, number>>;

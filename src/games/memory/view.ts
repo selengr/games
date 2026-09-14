@@ -4,6 +4,7 @@ import { loadJson, saveJson } from "../../shared/storage";
 import { checkMemoryClear, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
+import { shareText } from "../../shared/share";
 import {
   allMatched,
   columnsFor,
@@ -37,6 +38,8 @@ export function renderMemory(root: HTMLElement): void {
   let started = false;
   let tick: number | null = null;
   let best = loadJson<Best | null>(bestKey(size), null);
+  let combo = 0;
+  let bestCombo = 0;
 
   const stopTimer = (): void => {
     if (tick !== null) {
@@ -65,6 +68,8 @@ export function renderMemory(root: HTMLElement): void {
     seconds = 0;
     started = false;
     best = loadJson<Best | null>(bestKey(size), null);
+    combo = 0;
+    bestCombo = 0;
   };
 
   const paint = (): void => {
@@ -94,6 +99,7 @@ export function renderMemory(root: HTMLElement): void {
           <div class="scoreboard">
             <span class="score-pill">Moves ${moves}</span>
             <span class="score-pill">Time <span data-timer>${formatTime(seconds)}</span></span>
+            <span class="score-pill">Combo ${combo}${bestCombo ? ` · best ${bestCombo}` : ""}</span>
             ${
               best
                 ? `<span class="score-pill">Best ${best.moves} / ${formatTime(best.seconds)}</span>`
@@ -103,7 +109,7 @@ export function renderMemory(root: HTMLElement): void {
           <p class="status">${status}</p>
           ${
             done
-              ? `<div class="overlay-card"><strong>Nice clear!</strong>Shuffle again to beat your best.</div>`
+              ? `<div class="overlay-card"><strong>Nice clear!</strong>${moves} moves in ${formatTime(seconds)}.</div>`
               : ""
           }
           <div class="memory-grid cols-${cols}" role="grid" aria-label="Memory cards">
@@ -130,6 +136,11 @@ export function renderMemory(root: HTMLElement): void {
           </div>
           <div class="row">
             <button class="btn btn-primary" type="button" data-reset>Shuffle again</button>
+            ${
+              done
+                ? `<button class="btn btn-ghost" type="button" data-share>Share clear</button>`
+                : ""
+            }
           </div>
         </section>
       </div>
@@ -149,6 +160,13 @@ export function renderMemory(root: HTMLElement): void {
       sfx.tap();
       freshBoard(size);
       paint();
+    });
+
+    root.querySelector("[data-share]")?.addEventListener("click", () => {
+      void shareText(
+        "Arcade Hub Memory",
+        `Cleared Memory (${size}) in ${moves} moves and ${formatTime(seconds)} on Arcade Hub.`,
+      );
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-index]").forEach((btn) => {
@@ -176,6 +194,8 @@ export function renderMemory(root: HTMLElement): void {
           first.matched = true;
           second.matched = true;
           flipped = [];
+          combo += 1;
+          bestCombo = Math.max(bestCombo, combo);
           sfx.match();
           if (allMatched(cards)) {
             stopTimer();
@@ -195,6 +215,7 @@ export function renderMemory(root: HTMLElement): void {
           return;
         }
 
+        combo = 0;
         busy = true;
         paint();
         window.setTimeout(() => {

@@ -61,4 +61,16 @@ export const sfx = {
   draw: () => beep(300, 0.14, "triangle", 0.035),
   eat: () => beep(700, 0.06, "square", 0.04),
   die: () => beep(120, 0.28, "sawtooth", 0.035),
+  /** Reaction Duel — GO signal */
+  go: () => {
+    beep(880, 0.09, "square", 0.05);
+    window.setTimeout(() => beep(1175, 0.12, "square", 0.045), 55);
+  },
+  /** Reaction Duel — tapped too early */
+  falseStart: () => {
+    beep(220, 0.08, "sawtooth", 0.04);
+    window.setTimeout(() => beep(140, 0.18, "sawtooth", 0.035), 70);
+  },
+  flap: () => beep(520, 0.045, "triangle", 0.028),
+  score: () => beep(760, 0.07, "sine", 0.035),
 };

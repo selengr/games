@@ -1,7 +1,6 @@
 export type Route =
   | "hub"
   | "tictactoe"
-  | "rps"
   | "memory"
   | "snake"
   | "breakout"
@@ -13,7 +12,6 @@ export type Route =
 const routes: Route[] = [
   "hub",
   "tictactoe",
-  "rps",
   "memory",
   "snake",
   "breakout",

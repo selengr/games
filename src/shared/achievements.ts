@@ -14,7 +14,9 @@ export type AchievementId =
   | "memory_clear"
   | "memory_large"
   | "tour_all"
-  | "daily_clear";
+  | "daily_clear"
+  | "breakout_clear"
+  | "balloons_20";
 
 export type Achievement = {
   id: AchievementId;
@@ -31,6 +33,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "rps_streak", title: "On a roll", detail: "Hit a 5-win RPS streak" },
   { id: "memory_clear", title: "Sharp mind", detail: "Clear a Memory board" },
   { id: "memory_large", title: "Full house", detail: "Clear the large Memory board" },
+  { id: "breakout_clear", title: "Brick breaker", detail: "Clear a Breakout level" },
+  { id: "balloons_20", title: "Pop star", detail: "Pop 20 balloons in one run" },
   { id: "tour_all", title: "Tour complete", detail: "Open every game once" },
   { id: "daily_clear", title: "Daily grind", detail: "Finish today's challenge" },
 ];
@@ -57,12 +61,21 @@ export function unlock(id: AchievementId): boolean {
   return true;
 }
 
-export function markPlayed(game: "snake" | "tictactoe" | "rps" | "memory"): void {
+export function markPlayed(
+  game: "snake" | "tictactoe" | "rps" | "memory" | "breakout" | "balloons",
+): void {
   setLastGame(game);
   const played = loadJson<Record<string, boolean>>(PLAYED_KEY, {});
   played[game] = true;
   saveJson(PLAYED_KEY, played);
-  if (played.snake && played.tictactoe && played.rps && played.memory) {
+  if (
+    played.snake &&
+    played.tictactoe &&
+    played.rps &&
+    played.memory &&
+    played.breakout &&
+    played.balloons
+  ) {
     unlock("tour_all");
   }
 }
@@ -97,4 +110,14 @@ export function checkMemoryClear(large: boolean): AchievementId[] {
   if (unlock("memory_clear")) got.push("memory_clear");
   if (large && unlock("memory_large")) got.push("memory_large");
   return got;
+}
+
+export function checkBreakoutClear(): AchievementId[] {
+  if (unlock("breakout_clear")) return ["breakout_clear"];
+  return [];
+}
+
+export function checkBalloonsScore(score: number): AchievementId[] {
+  if (score >= 20 && unlock("balloons_20")) return ["balloons_20"];
+  return [];
 }

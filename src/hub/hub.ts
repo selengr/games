@@ -9,6 +9,10 @@ import {
 } from "../shared/daily";
 import { formatWhen, getHistory } from "../shared/history";
 import { ACHIEVEMENTS, unlockedIds } from "../shared/achievements";
+import {
+  dismissInstallTip,
+  shouldShowInstallTip,
+} from "../shared/installTip";
 
 const games: Array<{
   route: Exclude<Route, "hub">;
@@ -17,6 +21,7 @@ const games: Array<{
   tone: string;
 }> = [
   { route: "snake", title: "Snake", blurb: "Grow fast. Don't bite yourself.", tone: "tone-lime" },
+  { route: "flappy", title: "Flappy Lite", blurb: "Tap to flap through the gaps.", tone: "tone-teal" },
   { route: "breakout", title: "Breakout", blurb: "Bounce the ball. Smash the wall.", tone: "tone-coral" },
   { route: "balloons", title: "Balloon Pop", blurb: "Tap pops. Streaks score bigger.", tone: "tone-teal" },
   { route: "mole", title: "Whack-a-Mole", blurb: "Hit moles before they hide.", tone: "tone-gold" },
@@ -28,6 +33,7 @@ const games: Array<{
 
 const labels: Record<Exclude<Route, "hub">, string> = {
   snake: "Snake",
+  flappy: "Flappy Lite",
   breakout: "Breakout",
   balloons: "Balloon Pop",
   mole: "Whack-a-Mole",
@@ -77,13 +83,14 @@ export function renderHub(root: HTMLElement): void {
   const daily = getDailyChallenge();
   const dailyDone = isDailyDone();
   const recent = getHistory().slice(0, 5);
+  const showInstall = shouldShowInstallTip();
 
   root.innerHTML = `
     <div class="shell route-fade">
       ${renderChrome({ showBack: false, showBrand: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Eight quick games. Pick one and play.</p>
+        <p>Nine quick games. Pick one and play.</p>
         ${
           lastGame
             ? `<div class="row hero-actions">
@@ -137,6 +144,15 @@ export function renderHub(root: HTMLElement): void {
             </section>`
           : ""
       }
+
+      ${
+        showInstall
+          ? `<p class="install-tip" role="note">
+              <span>Tip: Add to Home Screen from your browser menu for a full-screen arcade.</span>
+              <button class="btn btn-ghost" type="button" data-dismiss-tip>Got it</button>
+            </p>`
+          : ""
+      }
     </div>
   `;
 
@@ -155,6 +171,12 @@ export function renderHub(root: HTMLElement): void {
     sfx.tap();
     startDailyRun();
     setRoute(daily.game);
+  });
+
+  root.querySelector("[data-dismiss-tip]")?.addEventListener("click", () => {
+    dismissInstallTip();
+    sfx.tap();
+    renderHub(root);
   });
 
   root.querySelectorAll<HTMLButtonElement>("[data-route]").forEach((btn) => {

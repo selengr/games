@@ -1,9 +1,11 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
+import { getSettings, setSnakePrefs } from "../../shared/settings";
 import { checkSnakeScore, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
+import { shareText } from "../../shared/share";
 import {
   GRID,
   canTurn,
@@ -17,29 +19,36 @@ import {
 } from "./logic";
 import "./snake.css";
 
-const BEST_KEY = "arcade-snake-best";
+function bestKey(speed: Speed): string {
+  return `arcade-snake-best-${speed}`;
+}
 
 type Phase = "ready" | "running" | "paused" | "over";
 
 export function renderSnake(root: HTMLElement): void {
   markPlayed("snake");
+  const prefs = getSettings();
   let snake = startSnake();
   let dir: Dir = "right";
   let pending: Dir | null = null;
   let food = spawnFood(snake);
   let score = 0;
-  let best = loadJson<number>(BEST_KEY, 0);
+  let speed: Speed = prefs.snakeSpeed;
+  let wrap = prefs.snakeWrap;
+  let best = loadJson<number>(bestKey(speed), 0);
   let phase: Phase = "ready";
-  let timer: number | null = null;
+  let raf = 0;
+  let lastTs = 0;
+  let acc = 0;
   let lastTouch: Point | null = null;
-  let speed: Speed = "normal";
-  let wrap = false;
 
   const stopLoop = (): void => {
-    if (timer !== null) {
-      window.clearInterval(timer);
-      timer = null;
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
     }
+    lastTs = 0;
+    acc = 0;
   };
 
   const paint = (): void => {
@@ -74,9 +83,14 @@ export function renderSnake(root: HTMLElement): void {
           </div>
           <div class="scoreboard">
             <span class="score-pill">Score ${score}</span>
-            <span class="score-pill">Best ${best}</span>
+            <span class="score-pill">Best (${speed}) ${best}</span>
           </div>
           <p class="status">${status}</p>
+          ${
+            phase === "over"
+              ? `<div class="overlay-card"><strong>Game over</strong>Score ${score}. Share it or run it back.</div>`
+              : ""
+          }
           <div class="snake-wrap">
             <canvas class="snake-canvas" width="480" height="480" aria-label="Snake game board"></canvas>
             <div class="row">
@@ -86,6 +100,11 @@ export function renderSnake(root: HTMLElement): void {
                   : phase === "paused"
                     ? `<button class="btn btn-primary" type="button" data-resume>Resume</button>`
                     : `<button class="btn btn-primary" type="button" data-start>${phase === "over" ? "Play again" : "Start"}</button>`
+              }
+              ${
+                phase === "over"
+                  ? `<button class="btn btn-ghost" type="button" data-share>Share score</button>`
+                  : ""
               }
             </div>
             <p class="hint">Keyboard: arrows or WASD · Space to pause</p>
@@ -107,7 +126,11 @@ export function renderSnake(root: HTMLElement): void {
       btn.addEventListener("click", () => {
         sfx.tap();
         speed = btn.dataset.speed as Speed;
-        if (phase === "running") startLoop();
+        best = loadJson<number>(bestKey(speed), 0);
+        setSnakePrefs(speed, wrap);
+        if (phase === "running") {
+          acc = 0;
+        }
         paint();
       });
     });
@@ -115,6 +138,7 @@ export function renderSnake(root: HTMLElement): void {
     root.querySelector("[data-wrap]")?.addEventListener("click", () => {
       sfx.tap();
       wrap = !wrap;
+      setSnakePrefs(speed, wrap);
       if (phase !== "running") reset(false);
       else paint();
     });
@@ -134,6 +158,12 @@ export function renderSnake(root: HTMLElement): void {
       phase = "running";
       startLoop();
       paint();
+    });
+    root.querySelector("[data-share]")?.addEventListener("click", () => {
+      void shareText(
+        "Arcade Hub Snake",
+        `I scored ${score} on Snake (${speed}${wrap ? ", wrap" : ""}) in Arcade Hub.`,
+      );
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-dir]").forEach((btn) => {
@@ -236,7 +266,9 @@ export function renderSnake(root: HTMLElement): void {
       sfx.die();
       if (score > best) {
         best = score;
-        saveJson(BEST_KEY, best);
+        saveJson(bestKey(speed), best);
+        const overall = loadJson<number>("arcade-snake-best", 0);
+        if (score > overall) saveJson("arcade-snake-best", score);
       }
       paint();
       return;
@@ -255,14 +287,29 @@ export function renderSnake(root: HTMLElement): void {
     if (scoreEl) {
       scoreEl.innerHTML = `
         <span class="score-pill">Score ${score}</span>
-        <span class="score-pill">Best ${best}</span>
+        <span class="score-pill">Best (${speed}) ${best}</span>
       `;
     }
   };
 
+  const frame = (ts: number): void => {
+    if (phase !== "running") return;
+    if (!lastTs) lastTs = ts;
+    const delta = ts - lastTs;
+    lastTs = ts;
+    acc += delta;
+    const stepEvery = tickMs(speed);
+    while (acc >= stepEvery) {
+      acc -= stepEvery;
+      tick();
+      if (phase !== "running") return;
+    }
+    raf = requestAnimationFrame(frame);
+  };
+
   const startLoop = (): void => {
     stopLoop();
-    timer = window.setInterval(tick, tickMs(speed));
+    raf = requestAnimationFrame(frame);
   };
 
   const reset = (autoStart: boolean): void => {
@@ -278,6 +325,7 @@ export function renderSnake(root: HTMLElement): void {
   };
 
   const onKey = (e: KeyboardEvent): void => {
+    if (root.querySelector("[data-help-modal]")) return;
     const map: Record<string, Dir> = {
       ArrowUp: "up",
       ArrowDown: "down",

@@ -63,10 +63,23 @@ export function openHelpModal(root: HTMLElement, game: keyof typeof HELP): void 
     </div>
   `;
 
-  const close = (): void => modal.remove();
+  const close = (): void => {
+    window.removeEventListener("keydown", onKey);
+    modal.remove();
+  };
+
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close();
+    }
+  };
+
   modal.addEventListener("click", (e) => {
     if (e.target === modal) close();
   });
   modal.querySelector("[data-help-close]")?.addEventListener("click", close);
+  window.addEventListener("keydown", onKey);
   root.appendChild(modal);
+  modal.querySelector<HTMLButtonElement>("[data-help-close]")?.focus();
 }

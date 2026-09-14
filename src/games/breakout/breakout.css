@@ -11,6 +11,13 @@
   background: #071418;
   touch-action: none;
   box-shadow: var(--shadow);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.breakout-canvas:active {
+  cursor: grabbing;
 }
 
 @media (max-width: 719px) {

@@ -122,7 +122,7 @@ export function renderReaction(root: HTMLElement): void {
       sfx.eat();
     } else if (result === "false") {
       lastMsg = "False start";
-      sfx.lose();
+      sfx.falseStart();
     } else {
       lastMsg = "Rival was faster";
       sfx.lose();
@@ -148,6 +148,7 @@ export function renderReaction(root: HTMLElement): void {
       phase = "go";
       goAt = performance.now();
       rivalAt = rivalDelayMs();
+      sfx.go();
       paint();
       rivalTimer = window.setTimeout(() => {
         if (phase !== "go") return;

@@ -1,6 +1,9 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
+import { checkRpsStreak, markPlayed } from "../../shared/achievements";
+import { announceUnlocks } from "../../shared/toast";
+import { burstAtElement } from "../../shared/fx";
 import {
   decide,
   glyph,
@@ -29,6 +32,7 @@ type Match = {
 const STATS_KEY = "arcade-rps-stats";
 
 export function renderRps(root: HTMLElement): void {
+  markPlayed("rps");
   let stats = loadJson<Stats>(STATS_KEY, {
     wins: 0,
     losses: 0,
@@ -58,7 +62,7 @@ export function renderRps(root: HTMLElement): void {
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true })}
+        ${renderChrome({ showBack: true, helpGame: "rps" })}
         <section class="panel">
           <h2>Rock Paper Scissors</h2>
           <p class="muted">First to ${match.target}. Streaks and career stats stay on this device.</p>
@@ -106,7 +110,7 @@ export function renderRps(root: HTMLElement): void {
       </div>
     `;
 
-    bindChrome(root, paint);
+    bindChrome(root, paint, "rps");
 
     root.querySelector("[data-new-match]")?.addEventListener("click", () => {
       sfx.tap();
@@ -147,6 +151,7 @@ export function renderRps(root: HTMLElement): void {
           stats.bestStreak = Math.max(stats.bestStreak, stats.streak);
           match.you += 1;
           sfx.win();
+          announceUnlocks(checkRpsStreak(stats.streak));
         } else if (outcome === "lose") {
           stats.losses += 1;
           stats.streak = 0;
@@ -157,7 +162,10 @@ export function renderRps(root: HTMLElement): void {
           sfx.draw();
         }
 
-        if (match.you >= match.target) matchOver = "you";
+        if (match.you >= match.target) {
+          matchOver = "you";
+          burstAtElement(root.querySelector(".rps-arena"));
+        }
         if (match.cpu >= match.target) matchOver = "cpu";
 
         saveJson(STATS_KEY, stats);

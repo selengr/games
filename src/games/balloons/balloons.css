@@ -1,0 +1,26 @@
+.balloons-wrap {
+  width: min(480px, 100%);
+}
+
+.balloons-canvas {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #102a30 0%, #071418 100%);
+  touch-action: manipulation;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+@media (max-width: 719px) {
+  .balloons-wrap {
+    width: min(100%, 94vw);
+  }
+
+  .balloons-canvas {
+    border-radius: 14px;
+    aspect-ratio: 3 / 4.2;
+  }
+}

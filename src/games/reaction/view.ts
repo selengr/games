@@ -74,7 +74,7 @@ export function renderReaction(root: HTMLElement): void {
           <div class="scoreboard">
             <span class="score-pill" data-you>You ${match.you}</span>
             <span class="score-pill" data-rival>Rival ${match.rival}</span>
-            <span class="score-pill">Best ${best}</span>
+            <span class="score-pill">Wins ${best}</span>
           </div>
           <p class="status" aria-live="polite">${
             phase === "match" ? "Match over" : "First to 5"

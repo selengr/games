@@ -1,11 +1,12 @@
 .snake-wrap {
   display: grid;
-  gap: 1rem;
-  justify-items: start;
+  gap: 0.85rem;
+  justify-items: center;
+  width: 100%;
 }
 
 .snake-canvas {
-  width: min(420px, 100%);
+  width: min(520px, 100%);
   aspect-ratio: 1;
   border-radius: 16px;
   border: 1px solid var(--line);
@@ -17,15 +18,16 @@
 
 .snake-pad {
   display: grid;
-  grid-template-columns: repeat(3, 64px);
-  grid-template-rows: repeat(3, 64px);
-  gap: 0.45rem;
-  margin-top: 0.5rem;
+  grid-template-columns: repeat(3, 72px);
+  grid-template-rows: repeat(3, 72px);
+  gap: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .snake-pad .btn {
   padding: 0;
-  border-radius: 12px;
+  border-radius: 16px;
+  font-size: 1.4rem;
 }
 
 .snake-pad [data-dir="up"] {
@@ -48,8 +50,26 @@
   grid-row: 2;
 }
 
+@media (max-width: 719px) {
+  .snake-canvas {
+    width: min(100%, 92vw);
+    max-width: none;
+    border-radius: 14px;
+  }
+
+  .snake-pad {
+    grid-template-columns: repeat(3, minmax(70px, 22vw));
+    grid-template-rows: repeat(3, minmax(70px, 22vw));
+    gap: 0.55rem;
+  }
+}
+
 @media (min-width: 720px) {
   .snake-pad {
     display: none;
+  }
+
+  .snake-wrap {
+    justify-items: start;
   }
 }

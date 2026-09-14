@@ -47,13 +47,11 @@ export function renderSnake(root: HTMLElement): void {
 
   const paint = (): void => {
     const status =
-      phase === "ready"
-        ? "Tap Start"
-        : phase === "paused"
-          ? "Paused"
-          : phase === "over"
-            ? `Score ${score}`
-            : "Go!";
+      phase === "paused"
+        ? "Paused"
+        : phase === "over"
+          ? `Score ${score}`
+          : "Go!";
 
     root.innerHTML = `
       <div class="shell route-fade">
@@ -300,5 +298,6 @@ export function renderSnake(root: HTMLElement): void {
     stopLoop();
   };
 
-  paint();
+  // kids can play right away — no extra Start tap
+  reset(true);
 }

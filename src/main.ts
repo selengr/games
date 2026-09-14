@@ -1,7 +1,6 @@
 import "./styles/global.css";
 import { renderHub } from "./hub/hub";
 import { renderTicTacToe } from "./games/tictactoe/view";
-import { renderRps } from "./games/rps/view";
 import { renderMemory } from "./games/memory/view";
 import { renderSnake } from "./games/snake/view";
 import { renderBreakout } from "./games/breakout/view";
@@ -59,7 +58,6 @@ function render(): void {
   else if (route === "reaction") renderReaction(app);
   else if (route === "flappy") renderFlappy(app);
   else if (route === "tictactoe") renderTicTacToe(app);
-  else if (route === "rps") renderRps(app);
   else if (route === "memory") renderMemory(app);
   else renderHub(app);
 }

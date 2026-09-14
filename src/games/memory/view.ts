@@ -4,124 +4,56 @@ import { loadJson, saveJson } from "../../shared/storage";
 import { checkMemoryClear, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
-import { shareText } from "../../shared/share";
 import { pushHistory } from "../../shared/history";
-import { getActiveDaily } from "../../shared/daily";
 import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   allMatched,
   columnsFor,
   createDeck,
-  pairCount,
-  type BoardSize,
   type Card,
 } from "./deck";
 import "./memory.css";
 
 type Best = { moves: number; seconds: number };
 
-function bestKey(size: BoardSize): string {
-  return `arcade-memory-best-${size}`;
-}
-
-function formatTime(total: number): string {
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
+const BEST_KEY = "arcade-memory-best-normal";
 
 export function renderMemory(root: HTMLElement): void {
   markPlayed("memory");
-  let size: BoardSize = "normal";
-  let cards: Card[] = createDeck(size);
+  let cards: Card[] = createDeck("normal");
   let flipped: number[] = [];
   let busy = false;
   let moves = 0;
-  let seconds = 0;
-  let started = false;
-  let tick: number | null = null;
-  let best = loadJson<Best | null>(bestKey(size), null);
-  let combo = 0;
-  let bestCombo = 0;
+  let best = loadJson<Best | null>(BEST_KEY, null);
 
-  const stopTimer = (): void => {
-    if (tick !== null) {
-      window.clearInterval(tick);
-      tick = null;
-    }
-  };
-
-  const startTimer = (): void => {
-    if (started) return;
-    started = true;
-    tick = window.setInterval(() => {
-      seconds += 1;
-      const el = root.querySelector("[data-timer]");
-      if (el) el.textContent = formatTime(seconds);
-    }, 1000);
-  };
-
-  const freshBoard = (nextSize: BoardSize = size): void => {
-    stopTimer();
-    size = nextSize;
-    cards = createDeck(size);
+  const freshBoard = (): void => {
+    cards = createDeck("normal");
     flipped = [];
     busy = false;
     moves = 0;
-    seconds = 0;
-    started = false;
-    best = loadJson<Best | null>(bestKey(size), null);
-    combo = 0;
-    bestCombo = 0;
+    best = loadJson<Best | null>(BEST_KEY, null);
   };
 
   const paint = (): void => {
     const done = allMatched(cards);
-    const cols = columnsFor(size);
-    const daily = getActiveDaily();
-    const status = done
-      ? `Cleared in ${moves} moves · ${formatTime(seconds)}`
-      : `Moves ${moves} · Time ${formatTime(seconds)}`;
+    const cols = columnsFor("normal");
+    const status = done ? "You did it!" : "Find the pairs";
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true, helpGame: "memory" })}
+        ${renderChrome({ showBack: true })}
         <section class="panel">
-          <h2>Memory Match</h2>
-          <p class="muted">${pairCount(size)} pairs. Timer starts on your first flip.</p>
-          ${
-            daily?.game === "memory"
-              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Clear a normal board within the move limit.</div>`
-              : ""
-          }
-          <div class="row" role="group" aria-label="Board size">
-            ${(["small", "normal", "large"] as BoardSize[])
-              .map(
-                (level) => `
-              <button class="btn btn-ghost ${size === level ? "btn-active" : ""}" type="button" data-size="${level}">
-                ${level}
-              </button>
-            `,
-              )
-              .join("")}
-          </div>
+          <h2>Memory</h2>
           <div class="scoreboard">
             <span class="score-pill">Moves ${moves}</span>
-            <span class="score-pill">Time <span data-timer>${formatTime(seconds)}</span></span>
-            <span class="score-pill">Combo ${combo}${bestCombo ? ` · best ${bestCombo}` : ""}</span>
             ${
               best
-                ? `<span class="score-pill">Best ${best.moves} / ${formatTime(best.seconds)}</span>`
+                ? `<span class="score-pill">Best ${best.moves}</span>`
                 : ""
             }
           </div>
           <p class="status" aria-live="polite">${status}</p>
-          ${
-            done
-              ? `<div class="overlay-card"><strong>Nice clear!</strong>${moves} moves in ${formatTime(seconds)}.</div>`
-              : ""
-          }
-          <div class="memory-grid cols-${cols}" role="grid" aria-label="Memory cards">
+          <div class="memory-grid cols-${cols}" role="grid" aria-label="Cards">
             ${cards
               .map((card, index) => {
                 const show =
@@ -144,38 +76,18 @@ export function renderMemory(root: HTMLElement): void {
               .join("")}
           </div>
           <div class="row">
-            <button class="btn btn-primary" type="button" data-reset>Shuffle again</button>
-            ${
-              done
-                ? `<button class="btn btn-ghost" type="button" data-share>Share clear</button>`
-                : ""
-            }
+            <button class="btn btn-primary" type="button" data-reset>New game</button>
           </div>
         </section>
       </div>
     `;
 
-    bindChrome(root, paint, "memory");
-
-    root.querySelectorAll<HTMLButtonElement>("[data-size]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        sfx.tap();
-        freshBoard(btn.dataset.size as BoardSize);
-        paint();
-      });
-    });
+    bindChrome(root, paint);
 
     root.querySelector("[data-reset]")?.addEventListener("click", () => {
       sfx.tap();
-      freshBoard(size);
+      freshBoard();
       paint();
-    });
-
-    root.querySelector("[data-share]")?.addEventListener("click", () => {
-      void shareText(
-        "Arcade Hub Memory",
-        `Cleared Memory (${size}) in ${moves} moves and ${formatTime(seconds)} on Arcade Hub.`,
-      );
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-index]").forEach((btn) => {
@@ -186,7 +98,6 @@ export function renderMemory(root: HTMLElement): void {
         if (!card || card.matched || flipped.includes(index)) return;
 
         unlockAudio();
-        startTimer();
         flipped.push(index);
         sfx.flip();
         paint();
@@ -203,30 +114,22 @@ export function renderMemory(root: HTMLElement): void {
           first.matched = true;
           second.matched = true;
           flipped = [];
-          combo += 1;
-          bestCombo = Math.max(bestCombo, combo);
           sfx.match();
           if (allMatched(cards)) {
-            stopTimer();
             sfx.win();
             burstAtElement(root.querySelector(".memory-grid"));
-            announceUnlocks(checkMemoryClear(size === "large"));
-            pushHistory("Memory", `cleared ${size} in ${moves} moves`);
-            if (size === "normal") maybeCompleteDaily("memory", moves);
-            if (
-              !best ||
-              moves < best.moves ||
-              (moves === best.moves && seconds < best.seconds)
-            ) {
-              best = { moves, seconds };
-              saveJson(bestKey(size), best);
+            announceUnlocks(checkMemoryClear(false));
+            pushHistory("Memory", `cleared in ${moves} moves`);
+            maybeCompleteDaily("memory", moves);
+            if (!best || moves < best.moves) {
+              best = { moves, seconds: 0 };
+              saveJson(BEST_KEY, best);
             }
           }
           paint();
           return;
         }
 
-        combo = 0;
         busy = true;
         paint();
         window.setTimeout(() => {
@@ -237,10 +140,6 @@ export function renderMemory(root: HTMLElement): void {
       });
     });
   };
-
-  const host = root as HTMLElement & { __memoryCleanup?: () => void };
-  host.__memoryCleanup?.();
-  host.__memoryCleanup = stopTimer;
 
   paint();
 }

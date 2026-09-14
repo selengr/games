@@ -7,7 +7,15 @@ describe("daily challenge", () => {
     const b = getDailyChallenge("2026-09-14");
     expect(a).toEqual(b);
     expect(a.date).toBe("2026-09-14");
-    expect(["snake", "memory", "rps", "tictactoe"]).toContain(a.game);
+    expect([
+      "snake",
+      "memory",
+      "rps",
+      "tictactoe",
+      "breakout",
+      "balloons",
+      "mole",
+    ]).toContain(a.game);
   });
 
   it("returns today's key as ISO date", () => {

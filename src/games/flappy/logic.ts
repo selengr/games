@@ -13,6 +13,17 @@ export type Pipe = {
   scored: boolean;
 };
 
+export type FlappyDiff = "easy" | "normal" | "hard";
+
+export type FlappyConfig = {
+  gravity: number;
+  flapV: number;
+  pipeSpeed: number;
+  pipeGap: number;
+  pipeEvery: number;
+  pipeW: number;
+};
+
 export type FlappyState = {
   bird: Bird;
   pipes: Pipe[];
@@ -21,16 +32,45 @@ export type FlappyState = {
   height: number;
   alive: boolean;
   spawnAcc: number;
+  difficulty: FlappyDiff;
+  config: FlappyConfig;
 };
 
-const GRAVITY = 0.28;
-const FLAP_V = -5.2;
-const PIPE_SPEED = 2.4;
-const PIPE_GAP = 128;
-const PIPE_W = 52;
-const PIPE_EVERY = 110;
+export const FLAPPY_DIFFS: FlappyDiff[] = ["easy", "normal", "hard"];
 
-export function createFlappy(width: number, height: number): FlappyState {
+export const FLAPPY_CONFIG: Record<FlappyDiff, FlappyConfig> = {
+  easy: {
+    gravity: 0.22,
+    flapV: -4.8,
+    pipeSpeed: 1.9,
+    pipeGap: 152,
+    pipeEvery: 125,
+    pipeW: 48,
+  },
+  normal: {
+    gravity: 0.28,
+    flapV: -5.2,
+    pipeSpeed: 2.4,
+    pipeGap: 128,
+    pipeEvery: 110,
+    pipeW: 52,
+  },
+  hard: {
+    gravity: 0.34,
+    flapV: -5.5,
+    pipeSpeed: 3.05,
+    pipeGap: 108,
+    pipeEvery: 92,
+    pipeW: 56,
+  },
+};
+
+export function createFlappy(
+  width: number,
+  height: number,
+  difficulty: FlappyDiff = "normal",
+): FlappyState {
+  const config = FLAPPY_CONFIG[difficulty];
   return {
     bird: {
       x: width * 0.28,
@@ -43,25 +83,27 @@ export function createFlappy(width: number, height: number): FlappyState {
     width,
     height,
     alive: true,
-    spawnAcc: PIPE_EVERY - 20,
+    spawnAcc: config.pipeEvery - 20,
+    difficulty,
+    config,
   };
 }
 
 export function flap(state: FlappyState): void {
   if (!state.alive) return;
-  state.bird.vy = FLAP_V;
+  state.bird.vy = state.config.flapV;
 }
 
 function spawnPipe(state: FlappyState): void {
   const margin = 48;
-  const gapH = PIPE_GAP;
+  const gapH = state.config.pipeGap;
   const maxTop = state.height - margin - gapH;
   const gapY = margin + Math.random() * Math.max(20, maxTop - margin);
   state.pipes.push({
     x: state.width + 10,
     gapY,
     gapH,
-    w: PIPE_W,
+    w: state.config.pipeW,
     scored: false,
   });
 }
@@ -78,7 +120,8 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
   if (!state.alive) return "die";
 
   const bird = state.bird;
-  bird.vy += GRAVITY;
+  const { gravity, pipeSpeed, pipeEvery } = state.config;
+  bird.vy += gravity;
   bird.y += bird.vy;
 
   if (bird.y + bird.r >= state.height || bird.y - bird.r <= 0) {
@@ -87,14 +130,14 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
   }
 
   state.spawnAcc += 1;
-  if (state.spawnAcc >= PIPE_EVERY) {
+  if (state.spawnAcc >= pipeEvery) {
     state.spawnAcc = 0;
     spawnPipe(state);
   }
 
   let scored = false;
   for (const pipe of state.pipes) {
-    pipe.x -= PIPE_SPEED;
+    pipe.x -= pipeSpeed;
     if (!pipe.scored && pipe.x + pipe.w < bird.x) {
       pipe.scored = true;
       state.score += 1;
@@ -108,4 +151,8 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
 
   state.pipes = state.pipes.filter((p) => p.x + p.w > -20);
   return scored ? "score" : "play";
+}
+
+export function flappyBestKey(diff: FlappyDiff): string {
+  return `arcade-flappy-best-${diff}`;
 }

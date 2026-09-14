@@ -6,11 +6,12 @@ A small TypeScript arcade you can actually play:
 - **Breakout** — paddle bounce, drag or arrow keys, clear the wall
 - **Balloon Pop** — tap to pop, streak bonuses, forgiving mobile hits
 - **Whack-a-Mole** — 30-second rounds, speeding speed, streak hits
+- **Reaction Duel** — wait for GO, beat the rival, first to 5
 - **Tic-Tac-Toe** — minimax AI or vs friend
 - **Rock Paper Scissors** — first to 3
 - **Memory Match** — flip pairs, best run
 
-Shared mute, daily challenge, recent plays, continue last game, offline cache, and scores in `localStorage`.
+Shared mute, daily challenge, badge strip, recent plays, continue last game, offline cache, and scores in `localStorage`.
 
 ## Live demo
 

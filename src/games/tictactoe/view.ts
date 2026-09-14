@@ -5,6 +5,9 @@ import { checkTttWin, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
 import { shareText } from "../../shared/share";
+import { pushHistory } from "../../shared/history";
+import { getActiveDaily } from "../../shared/daily";
+import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   aiPick,
   emptyBoard,
@@ -59,6 +62,11 @@ export function renderTicTacToe(root: HTMLElement): void {
               ? "You are X. Hard mode uses full minimax — it won't lose."
               : "Pass the device. X goes first."
           }</p>
+          ${
+            getActiveDaily()?.game === "tictactoe"
+              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Beat the AI to finish today's challenge.</div>`
+              : ""
+          }
           <div class="row" role="group" aria-label="Mode">
             <button class="btn btn-ghost ${mode === "ai" ? "btn-active" : ""}" type="button" data-mode="ai">vs AI</button>
             <button class="btn btn-ghost ${mode === "friend" ? "btn-active" : ""}" type="button" data-mode="friend">vs friend</button>
@@ -85,7 +93,7 @@ export function renderTicTacToe(root: HTMLElement): void {
             <span class="score-pill">Losses ${scores.losses}</span>
             <span class="score-pill">Draws ${scores.draws}</span>
           </div>
-          <p class="status">${status}</p>
+          <p class="status" aria-live="polite">${status}</p>
           ${
             winner
               ? `<div class="overlay-card"><strong>${status}</strong>Hit New game for another round.</div>`
@@ -182,12 +190,16 @@ export function renderTicTacToe(root: HTMLElement): void {
       sfx.win();
       burstAtElement(root.querySelector(".ttt-board"));
       announceUnlocks(checkTttWin(difficulty === "hard"));
+      pushHistory("Tic-Tac-Toe", `beat AI (${difficulty})`);
+      maybeCompleteDaily("tictactoe", 1);
     } else if (result === "O") {
       scores.losses += 1;
       sfx.lose();
+      pushHistory("Tic-Tac-Toe", `lost to AI (${difficulty})`);
     } else {
       scores.draws += 1;
       sfx.draw();
+      pushHistory("Tic-Tac-Toe", `draw vs AI (${difficulty})`);
     }
     saveJson(SCORE_KEY, scores);
   };

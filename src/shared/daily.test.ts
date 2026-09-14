@@ -10,7 +10,6 @@ describe("daily challenge", () => {
     expect([
       "snake",
       "memory",
-      "rps",
       "tictactoe",
       "breakout",
       "balloons",

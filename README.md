@@ -3,16 +3,15 @@
 A small TypeScript arcade you can actually play:
 
 - **Snake** — canvas loop, pause, swipe / WASD, high score
-- **Flappy Lite** — tap to flap through pipes
+- **Flappy Lite** — tap to flap, easy / normal / hard
 - **Breakout** — paddle bounce, drag or arrow keys, clear the wall
 - **Balloon Pop** — tap to pop, streak bonuses, forgiving mobile hits
 - **Whack-a-Mole** — 30-second rounds, rising speed, streak hits
 - **Reaction Duel** — wait for GO, beat the rival, first to 5
 - **Tic-Tac-Toe** — minimax AI or vs friend
-- **Rock Paper Scissors** — first to 3
 - **Memory Match** — flip pairs, best run
 
-Shared mute, daily challenge, badge strip, recent plays, soft PWA install tip, continue last game, offline cache, and scores in `localStorage`.
+Shared mute, daily challenge, badge strip, best scores row, recent plays, soft PWA install tip, continue last game, offline cache, and scores in `localStorage`.
 
 ## Live demo
 

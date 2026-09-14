@@ -1,39 +1,19 @@
 import { setRoute } from "./router";
-import { toggleMute, isMuted, getVolume, setVolume } from "./settings";
+import { toggleMute, isMuted } from "./settings";
 import { unlockAudio, sfx } from "./audio";
-import { openHelpModal } from "./help";
 
-export function renderChrome(opts: {
-  title?: string;
-  showBack?: boolean;
-  showVolume?: boolean;
-  helpGame?: "snake" | "tictactoe" | "rps" | "memory";
-}): string {
+export function renderChrome(opts: { showBack?: boolean }): string {
   const muted = isMuted();
-  const volume = Math.round(getVolume() * 100);
   return `
     <div class="brand-bar">
       <p class="brand">Arcade Hub</p>
       <div class="chrome-actions">
-        ${
-          opts.helpGame
-            ? `<button class="icon-btn" type="button" data-help>Help</button>`
-            : ""
-        }
-        <button class="icon-btn" type="button" data-mute aria-pressed="${muted}" title="${muted ? "Unmute" : "Mute"}">
-          ${muted ? "Sound off" : "Sound on"}
+        <button class="icon-btn" type="button" data-mute aria-pressed="${muted}">
+          ${muted ? "Sound off" : "Sound"}
         </button>
         ${
-          opts.showVolume !== false
-            ? `<label class="vol-control">
-                <span class="sr-only">Volume</span>
-                <input data-volume type="range" min="0" max="100" value="${volume}" aria-label="Volume" />
-              </label>`
-            : ""
-        }
-        ${
           opts.showBack
-            ? `<button class="back-btn" type="button" data-back>← Games</button>`
+            ? `<button class="back-btn" type="button" data-back>Back</button>`
             : ""
         }
       </div>
@@ -41,11 +21,7 @@ export function renderChrome(opts: {
   `;
 }
 
-export function bindChrome(
-  root: HTMLElement,
-  onChange?: () => void,
-  helpGame?: "snake" | "tictactoe" | "rps" | "memory",
-): void {
+export function bindChrome(root: HTMLElement, onChange?: () => void): void {
   root.querySelector("[data-back]")?.addEventListener("click", () => {
     sfx.tap();
     setRoute("hub");
@@ -56,22 +32,5 @@ export function bindChrome(
     toggleMute();
     sfx.tap();
     onChange?.();
-  });
-
-  root.querySelector<HTMLInputElement>("[data-volume]")?.addEventListener("input", (e) => {
-    const value = Number((e.target as HTMLInputElement).value) / 100;
-    setVolume(value);
-  });
-
-  root.querySelector<HTMLInputElement>("[data-volume]")?.addEventListener("change", (e) => {
-    unlockAudio();
-    const value = Number((e.target as HTMLInputElement).value) / 100;
-    setVolume(value);
-    sfx.tap();
-  });
-
-  root.querySelector("[data-help]")?.addEventListener("click", () => {
-    sfx.tap();
-    if (helpGame) openHelpModal(root, helpGame);
   });
 }

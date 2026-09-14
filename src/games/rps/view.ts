@@ -4,6 +4,9 @@ import { loadJson, saveJson } from "../../shared/storage";
 import { checkRpsStreak, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
+import { pushHistory } from "../../shared/history";
+import { getActiveDaily } from "../../shared/daily";
+import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   decide,
   glyph,
@@ -33,6 +36,7 @@ const STATS_KEY = "arcade-rps-stats";
 
 export function renderRps(root: HTMLElement): void {
   markPlayed("rps");
+  const dailyOn = getActiveDaily()?.game === "rps";
   let stats = loadJson<Stats>(STATS_KEY, {
     wins: 0,
     losses: 0,
@@ -66,6 +70,11 @@ export function renderRps(root: HTMLElement): void {
         <section class="panel">
           <h2>Rock Paper Scissors</h2>
           <p class="muted">First to ${match.target}. Streaks and career stats stay on this device.</p>
+          ${
+            dailyOn
+              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Win this match to clear it.</div>`
+              : ""
+          }
           <div class="scoreboard">
             <span class="score-pill">Match ${match.you}–${match.cpu}</span>
             <span class="score-pill">W ${stats.wins}</span>
@@ -86,7 +95,7 @@ export function renderRps(root: HTMLElement): void {
               <div class="muted">${lastCpu ? label(lastCpu) : "—"}</div>
             </div>
           </div>
-          <p class="status">${resultText}</p>
+          <p class="status" aria-live="polite">${resultText}</p>
           ${
             matchOver
               ? `<div class="overlay-card"><strong>${resultText}</strong>Start a new match when you're ready.</div>`
@@ -165,8 +174,13 @@ export function renderRps(root: HTMLElement): void {
         if (match.you >= match.target) {
           matchOver = "you";
           burstAtElement(root.querySelector(".rps-arena"));
+          pushHistory("RPS", `won match ${match.you}–${match.cpu}`);
+          maybeCompleteDaily("rps", 1);
         }
-        if (match.cpu >= match.target) matchOver = "cpu";
+        if (match.cpu >= match.target) {
+          matchOver = "cpu";
+          pushHistory("RPS", `lost match ${match.you}–${match.cpu}`);
+        }
 
         saveJson(STATS_KEY, stats);
         paint();

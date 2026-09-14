@@ -6,6 +6,9 @@ import { checkSnakeScore, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
 import { shareText } from "../../shared/share";
+import { pushHistory } from "../../shared/history";
+import { getActiveDaily } from "../../shared/daily";
+import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   GRID,
   canTurn,
@@ -52,6 +55,7 @@ export function renderSnake(root: HTMLElement): void {
   };
 
   const paint = (): void => {
+    const daily = getActiveDaily();
     const status =
       phase === "ready"
         ? "Press Start or hit an arrow key"
@@ -67,6 +71,11 @@ export function renderSnake(root: HTMLElement): void {
         <section class="panel">
           <h2>Snake</h2>
           <p class="muted">Eat the dots. Walls kill you — unless wrap is on.</p>
+          ${
+            daily?.game === "snake"
+              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Hit the target score, then finish a run.</div>`
+              : ""
+          }
           <div class="row" role="group" aria-label="Speed">
             ${(["chill", "normal", "insane"] as Speed[])
               .map(
@@ -85,7 +94,7 @@ export function renderSnake(root: HTMLElement): void {
             <span class="score-pill">Score ${score}</span>
             <span class="score-pill">Best (${speed}) ${best}</span>
           </div>
-          <p class="status">${status}</p>
+          <p class="status" aria-live="polite">${status}</p>
           ${
             phase === "over"
               ? `<div class="overlay-card"><strong>Game over</strong>Score ${score}. Share it or run it back.</div>`
@@ -270,6 +279,8 @@ export function renderSnake(root: HTMLElement): void {
         const overall = loadJson<number>("arcade-snake-best", 0);
         if (score > overall) saveJson("arcade-snake-best", score);
       }
+      pushHistory("Snake", `scored ${score} (${speed})`);
+      maybeCompleteDaily("snake", score);
       paint();
       return;
     }

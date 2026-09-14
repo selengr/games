@@ -1,13 +1,10 @@
 import { bindChrome, renderChrome } from "../../shared/chrome";
 import { sfx, unlockAudio } from "../../shared/audio";
 import { loadJson, saveJson } from "../../shared/storage";
-import { getSettings, setSnakePrefs } from "../../shared/settings";
 import { checkSnakeScore, markPlayed } from "../../shared/achievements";
 import { announceUnlocks } from "../../shared/toast";
 import { burstAtElement } from "../../shared/fx";
-import { shareText } from "../../shared/share";
 import { pushHistory } from "../../shared/history";
-import { getActiveDaily } from "../../shared/daily";
 import { maybeCompleteDaily } from "../../shared/dailyComplete";
 import {
   GRID,
@@ -18,27 +15,21 @@ import {
   tickMs,
   type Dir,
   type Point,
-  type Speed,
 } from "./logic";
 import "./snake.css";
 
-function bestKey(speed: Speed): string {
-  return `arcade-snake-best-${speed}`;
-}
+const BEST_KEY = "arcade-snake-best-normal";
 
 type Phase = "ready" | "running" | "paused" | "over";
 
 export function renderSnake(root: HTMLElement): void {
   markPlayed("snake");
-  const prefs = getSettings();
   let snake = startSnake();
   let dir: Dir = "right";
   let pending: Dir | null = null;
   let food = spawnFood(snake);
   let score = 0;
-  let speed: Speed = prefs.snakeSpeed;
-  let wrap = prefs.snakeWrap;
-  let best = loadJson<number>(bestKey(speed), 0);
+  let best = loadJson<number>(BEST_KEY, 0);
   let phase: Phase = "ready";
   let raf = 0;
   let lastTs = 0;
@@ -55,53 +46,27 @@ export function renderSnake(root: HTMLElement): void {
   };
 
   const paint = (): void => {
-    const daily = getActiveDaily();
     const status =
       phase === "ready"
-        ? "Press Start or hit an arrow key"
+        ? "Tap Start"
         : phase === "paused"
           ? "Paused"
           : phase === "over"
-            ? `Game over · score ${score}`
+            ? `Score ${score}`
             : "Go!";
 
     root.innerHTML = `
       <div class="shell route-fade">
-        ${renderChrome({ showBack: true, helpGame: "snake" })}
+        ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Snake</h2>
-          <p class="muted">Eat the dots. Walls kill you — unless wrap is on.</p>
-          ${
-            daily?.game === "snake"
-              ? `<div class="overlay-card"><strong>Daily challenge active</strong>Hit the target score, then finish a run.</div>`
-              : ""
-          }
-          <div class="row" role="group" aria-label="Speed">
-            ${(["chill", "normal", "insane"] as Speed[])
-              .map(
-                (level) => `
-              <button class="btn btn-ghost ${speed === level ? "btn-active" : ""}" type="button" data-speed="${level}">
-                ${level}
-              </button>
-            `,
-              )
-              .join("")}
-            <button class="btn btn-ghost ${wrap ? "btn-active" : ""}" type="button" data-wrap>
-              ${wrap ? "wrap on" : "wrap off"}
-            </button>
-          </div>
           <div class="scoreboard">
             <span class="score-pill">Score ${score}</span>
-            <span class="score-pill">Best (${speed}) ${best}</span>
+            <span class="score-pill">Best ${best}</span>
           </div>
           <p class="status" aria-live="polite">${status}</p>
-          ${
-            phase === "over"
-              ? `<div class="overlay-card"><strong>Game over</strong>Score ${score}. Share it or run it back.</div>`
-              : ""
-          }
           <div class="snake-wrap">
-            <canvas class="snake-canvas" width="480" height="480" aria-label="Snake game board"></canvas>
+            <canvas class="snake-canvas" width="480" height="480" aria-label="Snake game"></canvas>
             <div class="row">
               ${
                 phase === "running"
@@ -110,14 +75,8 @@ export function renderSnake(root: HTMLElement): void {
                     ? `<button class="btn btn-primary" type="button" data-resume>Resume</button>`
                     : `<button class="btn btn-primary" type="button" data-start>${phase === "over" ? "Play again" : "Start"}</button>`
               }
-              ${
-                phase === "over"
-                  ? `<button class="btn btn-ghost" type="button" data-share>Share score</button>`
-                  : ""
-              }
             </div>
-            <p class="hint">Keyboard: arrows or WASD · Space to pause</p>
-            <div class="snake-pad" aria-label="Touch controls">
+            <div class="snake-pad" aria-label="Controls">
               <button class="btn btn-ghost" type="button" data-dir="up">↑</button>
               <button class="btn btn-ghost" type="button" data-dir="left">←</button>
               <button class="btn btn-ghost" type="button" data-dir="down">↓</button>
@@ -128,29 +87,8 @@ export function renderSnake(root: HTMLElement): void {
       </div>
     `;
 
-    bindChrome(root, paint, "snake");
+    bindChrome(root, paint);
     draw();
-
-    root.querySelectorAll<HTMLButtonElement>("[data-speed]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        sfx.tap();
-        speed = btn.dataset.speed as Speed;
-        best = loadJson<number>(bestKey(speed), 0);
-        setSnakePrefs(speed, wrap);
-        if (phase === "running") {
-          acc = 0;
-        }
-        paint();
-      });
-    });
-
-    root.querySelector("[data-wrap]")?.addEventListener("click", () => {
-      sfx.tap();
-      wrap = !wrap;
-      setSnakePrefs(speed, wrap);
-      if (phase !== "running") reset(false);
-      else paint();
-    });
 
     root.querySelector("[data-start]")?.addEventListener("click", () => {
       unlockAudio();
@@ -167,12 +105,6 @@ export function renderSnake(root: HTMLElement): void {
       phase = "running";
       startLoop();
       paint();
-    });
-    root.querySelector("[data-share]")?.addEventListener("click", () => {
-      void shareText(
-        "Arcade Hub Snake",
-        `I scored ${score} on Snake (${speed}${wrap ? ", wrap" : ""}) in Arcade Hub.`,
-      );
     });
 
     root.querySelectorAll<HTMLButtonElement>("[data-dir]").forEach((btn) => {
@@ -221,18 +153,6 @@ export function renderSnake(root: HTMLElement): void {
     ctx.fillStyle = "#0b1f24";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "rgba(232,244,241,0.05)";
-    for (let i = 0; i <= GRID; i += 1) {
-      ctx.beginPath();
-      ctx.moveTo(i * cell, 0);
-      ctx.lineTo(i * cell, canvas.height);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i * cell);
-      ctx.lineTo(canvas.width, i * cell);
-      ctx.stroke();
-    }
-
     ctx.fillStyle = "#ff6b4a";
     ctx.beginPath();
     ctx.arc(
@@ -268,18 +188,17 @@ export function renderSnake(root: HTMLElement): void {
       pending = null;
     }
 
-    const result = step(snake, dir, food, wrap);
+    const result = step(snake, dir, food, false);
     if (result.dead) {
       phase = "over";
       stopLoop();
       sfx.die();
       if (score > best) {
         best = score;
-        saveJson(bestKey(speed), best);
-        const overall = loadJson<number>("arcade-snake-best", 0);
-        if (score > overall) saveJson("arcade-snake-best", score);
+        saveJson(BEST_KEY, best);
+        saveJson("arcade-snake-best", score);
       }
-      pushHistory("Snake", `scored ${score} (${speed})`);
+      pushHistory("Snake", `scored ${score}`);
       maybeCompleteDaily("snake", score);
       paint();
       return;
@@ -298,7 +217,7 @@ export function renderSnake(root: HTMLElement): void {
     if (scoreEl) {
       scoreEl.innerHTML = `
         <span class="score-pill">Score ${score}</span>
-        <span class="score-pill">Best (${speed}) ${best}</span>
+        <span class="score-pill">Best ${best}</span>
       `;
     }
   };
@@ -309,7 +228,7 @@ export function renderSnake(root: HTMLElement): void {
     const delta = ts - lastTs;
     lastTs = ts;
     acc += delta;
-    const stepEvery = tickMs(speed);
+    const stepEvery = tickMs("normal");
     while (acc >= stepEvery) {
       acc -= stepEvery;
       tick();
@@ -336,7 +255,6 @@ export function renderSnake(root: HTMLElement): void {
   };
 
   const onKey = (e: KeyboardEvent): void => {
-    if (root.querySelector("[data-help-modal]")) return;
     const map: Record<string, Dir> = {
       ArrowUp: "up",
       ArrowDown: "down",

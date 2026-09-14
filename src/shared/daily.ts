@@ -23,7 +23,6 @@ const ACTIVE_KEY = "arcade-daily-active";
 const TITLES: Record<DailyGame, string> = {
   snake: "Snake sprint",
   memory: "Memory dash",
-  rps: "RPS match",
   tictactoe: "Beat the AI",
   breakout: "Brick bash",
   balloons: "Pop party",
@@ -48,7 +47,6 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
   const games: DailyGame[] = [
     "snake",
     "memory",
-    "rps",
     "tictactoe",
     "breakout",
     "balloons",
@@ -78,19 +76,17 @@ export function getDailyChallenge(date = todayKey()): DailyChallenge {
       ? `Score at least ${target} in one run.`
       : game === "memory"
         ? `Clear a normal board in ${target} moves or fewer.`
-        : game === "rps"
-          ? "Win one first-to-three match."
-          : game === "breakout"
-            ? "Clear all bricks in one run."
-            : game === "balloons"
-              ? `Pop at least ${target} balloons.`
-              : game === "mole"
-                ? `Score at least ${target} in Whack-a-Mole.`
-                : game === "reaction"
-                  ? "Win one Reaction Duel match."
-                  : game === "flappy"
-                    ? `Clear at least ${target} pipes in Flappy Lite.`
-                    : "Win a round against the AI.";
+        : game === "breakout"
+          ? "Clear all bricks in one run."
+          : game === "balloons"
+            ? `Pop at least ${target} balloons.`
+            : game === "mole"
+              ? `Score at least ${target} in Whack-a-Mole.`
+              : game === "reaction"
+                ? "Win one Reaction Duel match."
+                : game === "flappy"
+                  ? `Clear at least ${target} pipes in Flappy Lite.`
+                  : "Win a round against the AI.";
 
   return {
     date,

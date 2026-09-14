@@ -13,6 +13,7 @@ import {
   dismissInstallTip,
   shouldShowInstallTip,
 } from "../shared/installTip";
+import { getHubBests } from "../shared/bests";
 
 const games: Array<{
   route: Exclude<Route, "hub">;
@@ -27,7 +28,6 @@ const games: Array<{
   { route: "mole", title: "Whack-a-Mole", blurb: "Hit moles before they hide.", tone: "tone-gold" },
   { route: "reaction", title: "Reaction Duel", blurb: "Wait for GO. Beat the rival.", tone: "tone-coral" },
   { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
-  { route: "rps", title: "Rock Paper Scissors", blurb: "First to three wins.", tone: "tone-mist" },
   { route: "memory", title: "Memory", blurb: "Flip cards. Match the pairs.", tone: "tone-lime" },
 ];
 
@@ -39,7 +39,6 @@ const labels: Record<Exclude<Route, "hub">, string> = {
   mole: "Whack-a-Mole",
   reaction: "Reaction Duel",
   tictactoe: "Tic-Tac-Toe",
-  rps: "Rock Paper Scissors",
   memory: "Memory",
 };
 
@@ -78,6 +77,29 @@ function badgesStripHtml(): string {
   `;
 }
 
+function bestsRowHtml(): string {
+  const bests = getHubBests();
+  if (!bests.length) return "";
+  return `
+    <section class="panel bests-row" aria-label="Best scores">
+      <div class="badge-strip-head">
+        <h2>Best scores</h2>
+      </div>
+      <div class="bests-rail">
+        ${bests
+          .map(
+            (b) => `
+          <div class="best-chip">
+            <span>${b.label}</span>
+            <strong>${b.value}</strong>
+          </div>`,
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 export function renderHub(root: HTMLElement): void {
   const lastGame = getSettings().lastGame;
   const daily = getDailyChallenge();
@@ -90,7 +112,7 @@ export function renderHub(root: HTMLElement): void {
       ${renderChrome({ showBack: false, showBrand: false })}
       <header class="hero">
         <h1>Arcade Hub</h1>
-        <p>Nine quick games. Pick one and play.</p>
+        <p>Eight focused games. Pick one and play.</p>
         ${
           lastGame
             ? `<div class="row hero-actions">
@@ -111,6 +133,7 @@ export function renderHub(root: HTMLElement): void {
         </div>
       </section>
 
+      ${bestsRowHtml()}
       ${badgesStripHtml()}
 
       <section class="game-grid" aria-label="Games">

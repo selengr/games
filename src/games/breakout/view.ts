@@ -15,6 +15,7 @@ import {
 import "./breakout.css";
 
 const BEST_KEY = "arcade-breakout-best";
+const PADDLE_STEP = 28;
 
 type Phase = "running" | "over" | "clear";
 
@@ -26,12 +27,15 @@ export function renderBreakout(root: HTMLElement): void {
   let raf = 0;
   let acc = 0;
   let lastTs = 0;
+  let pointerActive = false;
+  let keys = { left: false, right: false };
 
   root.innerHTML = `
     <div class="shell route-fade">
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Breakout</h2>
+        <p class="hint">Drag or use ← → to keep the ball up. Clear every brick!</p>
         <div class="scoreboard">
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-lives>Lives 3</span>
@@ -68,7 +72,7 @@ export function renderBreakout(root: HTMLElement): void {
           ? "All clear!"
           : phase === "over"
             ? "Game over"
-            : "Drag to move";
+            : "Drag or use arrows";
     }
     if (againBtn) againBtn.hidden = phase === "running";
   };
@@ -107,6 +111,8 @@ export function renderBreakout(root: HTMLElement): void {
     raf = 0;
     lastTs = 0;
     acc = 0;
+    keys = { left: false, right: false };
+    pointerActive = false;
   };
 
   const finish = (next: Phase): void => {
@@ -129,6 +135,13 @@ export function renderBreakout(root: HTMLElement): void {
     syncHud();
   };
 
+  const applyKeys = (): void => {
+    if (!state || phase !== "running" || pointerActive) return;
+    if (keys.left === keys.right) return;
+    const dir = keys.left ? -1 : 1;
+    movePaddle(state, state.paddleX + state.paddleW / 2 + dir * PADDLE_STEP);
+  };
+
   const frame = (ts: number): void => {
     if (phase !== "running" || !state) return;
     if (!lastTs) lastTs = ts;
@@ -137,6 +150,7 @@ export function renderBreakout(root: HTMLElement): void {
     acc += delta;
     while (acc >= 16) {
       acc -= 16;
+      applyKeys();
       const result = stepBreakout(state);
       if (result === "clear") {
         draw();
@@ -172,24 +186,57 @@ export function renderBreakout(root: HTMLElement): void {
     movePaddle(state, x);
   };
 
-  let dragging = false;
+  canvas?.addEventListener(
+    "pointerdown",
+    (e) => {
+      unlockAudio();
+      e.preventDefault();
+      pointerActive = true;
+      canvas.setPointerCapture(e.pointerId);
+      pointer(e.clientX);
+    },
+    { passive: false },
+  );
+  canvas?.addEventListener(
+    "pointermove",
+    (e) => {
+      if (!pointerActive && e.pointerType !== "mouse") return;
+      if (e.pointerType === "mouse" && e.buttons === 0 && !pointerActive) {
+        // Hover-aim on desktop without clicking.
+        pointer(e.clientX);
+        return;
+      }
+      if (!pointerActive) return;
+      e.preventDefault();
+      pointer(e.clientX);
+    },
+    { passive: false },
+  );
+  const endPointer = (): void => {
+    pointerActive = false;
+  };
+  canvas?.addEventListener("pointerup", endPointer);
+  canvas?.addEventListener("pointercancel", endPointer);
+  canvas?.addEventListener("lostpointercapture", endPointer);
 
-  canvas?.addEventListener("pointerdown", (e) => {
-    unlockAudio();
-    dragging = true;
-    canvas.setPointerCapture(e.pointerId);
-    pointer(e.clientX);
-  });
-  canvas?.addEventListener("pointermove", (e) => {
-    if (!dragging) return;
-    pointer(e.clientX);
-  });
-  canvas?.addEventListener("pointerup", () => {
-    dragging = false;
-  });
-  canvas?.addEventListener("pointercancel", () => {
-    dragging = false;
-  });
+  const onKeyDown = (e: KeyboardEvent): void => {
+    if (phase !== "running") return;
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+      e.preventDefault();
+      keys.left = true;
+      unlockAudio();
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+      e.preventDefault();
+      keys.right = true;
+      unlockAudio();
+    }
+  };
+  const onKeyUp = (e: KeyboardEvent): void => {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
+  };
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
 
   againBtn?.addEventListener("click", () => {
     sfx.tap();
@@ -198,7 +245,11 @@ export function renderBreakout(root: HTMLElement): void {
 
   const host = root as HTMLElement & { __breakoutCleanup?: () => void };
   host.__breakoutCleanup?.();
-  host.__breakoutCleanup = stop;
+  host.__breakoutCleanup = () => {
+    stop();
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keyup", onKeyUp);
+  };
 
   start();
 }

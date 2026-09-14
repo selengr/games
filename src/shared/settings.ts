@@ -1,6 +1,7 @@
 import { loadJson, saveJson } from "./storage";
 import type { Route } from "./router";
 import type { Speed } from "../games/snake/logic";
+import type { FlappyDiff } from "../games/flappy/logic";
 
 const KEY = "arcade-settings";
 
@@ -10,6 +11,7 @@ export type Settings = {
   lastGame: Exclude<Route, "hub"> | null;
   snakeSpeed: Speed;
   snakeWrap: boolean;
+  flappyDiff: FlappyDiff;
 };
 
 const defaults: Settings = {
@@ -18,6 +20,7 @@ const defaults: Settings = {
   lastGame: null,
   snakeSpeed: "normal",
   snakeWrap: false,
+  flappyDiff: "normal",
 };
 
 export function getSettings(): Settings {
@@ -30,7 +33,6 @@ export function getSettings(): Settings {
   const lastGame =
     raw.lastGame === "snake" ||
     raw.lastGame === "tictactoe" ||
-    raw.lastGame === "rps" ||
     raw.lastGame === "memory" ||
     raw.lastGame === "breakout" ||
     raw.lastGame === "balloons" ||
@@ -47,12 +49,20 @@ export function getSettings(): Settings {
       ? raw.snakeSpeed
       : defaults.snakeSpeed;
 
+  const flappyDiff =
+    raw.flappyDiff === "easy" ||
+    raw.flappyDiff === "normal" ||
+    raw.flappyDiff === "hard"
+      ? raw.flappyDiff
+      : defaults.flappyDiff;
+
   return {
     muted: Boolean(raw.muted),
     volume,
     lastGame,
     snakeSpeed,
     snakeWrap: Boolean(raw.snakeWrap),
+    flappyDiff,
   };
 }
 
@@ -87,4 +97,8 @@ export function setLastGame(game: Exclude<Route, "hub">): void {
 
 export function setSnakePrefs(speed: Speed, wrap: boolean): void {
   saveJson(KEY, { ...getSettings(), snakeSpeed: speed, snakeWrap: wrap });
+}
+
+export function setFlappyDiff(flappyDiff: FlappyDiff): void {
+  saveJson(KEY, { ...getSettings(), flappyDiff });
 }

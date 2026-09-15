@@ -26,11 +26,11 @@ function statusText(
   locked: boolean,
 ): string {
   const winner = getWinner(board);
-  if (winner === "X") return "You win!";
-  if (winner === "O") return "You lose";
-  if (winner === "draw") return "Draw";
+  if (winner === "X") return "You win! — New game to retry";
+  if (winner === "O") return "You lose — New game to retry";
+  if (winner === "draw") return "Draw — New game to retry";
   if (locked) return "Thinking…";
-  return "Your turn";
+  return "Your turn — tap a cell";
 }
 
 function refreshMute(root: HTMLElement): void {
@@ -74,7 +74,7 @@ export function renderTicTacToe(root: HTMLElement): void {
           `).join("")}
         </div>
         <div class="row ttt-actions">
-          <button class="btn btn-primary" type="button" data-reset>New game</button>
+          <button class="btn btn-primary" type="button" data-reset>New game / Retry</button>
         </div>
       </section>
     </div>

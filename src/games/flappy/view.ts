@@ -35,7 +35,7 @@ export function renderFlappy(root: HTMLElement): void {
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Flappy Lite</h2>
-          <p class="hint">Tap or press Space to flap. Pick a difficulty, then fly.</p>
+          <p class="hint">Tap or press Space to flap. Hard is faster with tighter gaps — still fair.</p>
           <div class="row flappy-diffs" role="group" aria-label="Difficulty">
             ${FLAPPY_DIFFS.map(
               (d) => `

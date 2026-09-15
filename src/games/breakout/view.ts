@@ -17,12 +17,12 @@ import "./breakout.css";
 const BEST_KEY = "arcade-breakout-best";
 const PADDLE_STEP = 28;
 
-type Phase = "running" | "over" | "clear";
+type Phase = "ready" | "running" | "over" | "clear";
 
 export function renderBreakout(root: HTMLElement): void {
   markPlayed("breakout");
   let best = loadJson<number>(BEST_KEY, 0);
-  let phase: Phase = "running";
+  let phase: Phase = "ready";
   let state: BreakoutState | null = null;
   let raf = 0;
   let acc = 0;
@@ -36,7 +36,7 @@ export function renderBreakout(root: HTMLElement): void {
       <section class="panel">
         <h2>Breakout</h2>
         <ol class="game-how">
-          <li>Drag on the board (or press <strong>← →</strong> / A D) to move the paddle.</li>
+          <li>Press <strong>Start</strong>, then drag (or ← → / A D) to move the paddle.</li>
           <li>Bounce the ball so it stays in play.</li>
           <li>Break every brick to clear the level.</li>
         </ol>
@@ -45,12 +45,12 @@ export function renderBreakout(root: HTMLElement): void {
           <span class="score-pill" data-lives>Lives 3</span>
           <span class="score-pill" data-best>Best ${best}</span>
         </div>
-        <p class="status" data-status aria-live="polite">Drag to move</p>
+        <p class="status" data-status aria-live="polite">Press Start</p>
         <div class="breakout-wrap">
           <canvas class="breakout-canvas" width="480" height="360" aria-label="Breakout"></canvas>
         </div>
         <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
+          <button class="btn btn-primary" type="button" data-again>Start</button>
         </div>
       </section>
     </div>
@@ -66,19 +66,24 @@ export function renderBreakout(root: HTMLElement): void {
   const againBtn = root.querySelector<HTMLButtonElement>("[data-again]");
 
   const syncHud = (): void => {
-    if (!state) return;
-    if (scoreEl) scoreEl.textContent = `Score ${state.score}`;
-    if (livesEl) livesEl.textContent = `Lives ${state.lives}`;
+    if (scoreEl) scoreEl.textContent = `Score ${state?.score ?? 0}`;
+    if (livesEl) livesEl.textContent = `Lives ${state?.lives ?? 3}`;
     if (bestEl) bestEl.textContent = `Best ${best}`;
     if (statusEl) {
       statusEl.textContent =
-        phase === "clear"
-          ? "All clear! Tap to retry"
-          : phase === "over"
-            ? "Game over — tap to retry"
-            : "Drag or use arrows";
+        phase === "ready"
+          ? "Press Start or tap the board"
+          : phase === "clear"
+            ? "All clear! Tap to retry"
+            : phase === "over"
+              ? "Game over — tap to retry"
+              : "Drag or use arrows";
     }
-    if (againBtn) againBtn.hidden = phase === "running";
+    if (againBtn) {
+      againBtn.hidden = phase === "running";
+      againBtn.textContent =
+        phase === "ready" ? "Start" : phase === "clear" ? "Play again" : "Retry run";
+    }
   };
 
   const draw = (): void => {
@@ -108,6 +113,13 @@ export function renderBreakout(root: HTMLElement): void {
     ctx.beginPath();
     ctx.arc(state.ballX, state.ballY, state.ballR, 0, Math.PI * 2);
     ctx.fill();
+
+    if (phase === "ready") {
+      ctx.fillStyle = "rgba(232, 244, 241, 0.92)";
+      ctx.font = "700 22px Syne, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Tap to start", canvas.width / 2, canvas.height * 0.55);
+    }
   };
 
   const stop = (): void => {
@@ -119,7 +131,7 @@ export function renderBreakout(root: HTMLElement): void {
     pointerActive = false;
   };
 
-  const finish = (next: Phase): void => {
+  const finish = (next: "over" | "clear"): void => {
     phase = next;
     stop();
     if (state && state.score > best) {
@@ -137,6 +149,7 @@ export function renderBreakout(root: HTMLElement): void {
       pushHistory("Breakout", `score ${state?.score ?? 0}`);
     }
     syncHud();
+    draw();
   };
 
   const applyKeys = (): void => {
@@ -173,14 +186,27 @@ export function renderBreakout(root: HTMLElement): void {
     raf = requestAnimationFrame(frame);
   };
 
-  const start = (): void => {
+  const resetReady = (): void => {
     if (!canvas) return;
     stop();
     state = createBreakout(canvas.width, canvas.height);
+    phase = "ready";
+    syncHud();
+    draw();
+  };
+
+  const beginRun = (): void => {
+    if (!state) resetReady();
+    if (!state) return;
     phase = "running";
     syncHud();
     draw();
     raf = requestAnimationFrame(frame);
+  };
+
+  const retry = (): void => {
+    resetReady();
+    beginRun();
   };
 
   const pointer = (clientX: number): void => {
@@ -195,9 +221,17 @@ export function renderBreakout(root: HTMLElement): void {
     (e) => {
       unlockAudio();
       e.preventDefault();
+      if (phase === "ready") {
+        sfx.tap();
+        beginRun();
+        pointerActive = true;
+        canvas.setPointerCapture(e.pointerId);
+        pointer(e.clientX);
+        return;
+      }
       if (phase === "over" || phase === "clear") {
         sfx.tap();
-        start();
+        retry();
         return;
       }
       pointerActive = true;
@@ -211,7 +245,6 @@ export function renderBreakout(root: HTMLElement): void {
     (e) => {
       if (!pointerActive && e.pointerType !== "mouse") return;
       if (e.pointerType === "mouse" && e.buttons === 0 && !pointerActive) {
-        // Hover-aim on desktop without clicking.
         pointer(e.clientX);
         return;
       }
@@ -229,6 +262,17 @@ export function renderBreakout(root: HTMLElement): void {
   canvas?.addEventListener("lostpointercapture", endPointer);
 
   const onKeyDown = (e: KeyboardEvent): void => {
+    if (e.code === "Space" || e.key === " ") {
+      e.preventDefault();
+      unlockAudio();
+      if (phase === "ready") beginRun();
+      else if (phase === "over" || phase === "clear") retry();
+      return;
+    }
+    if (phase === "ready" && (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "a" || e.key === "A" || e.key === "d" || e.key === "D")) {
+      unlockAudio();
+      beginRun();
+    }
     if (phase !== "running") return;
     if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
       e.preventDefault();
@@ -249,7 +293,9 @@ export function renderBreakout(root: HTMLElement): void {
 
   againBtn?.addEventListener("click", () => {
     sfx.tap();
-    start();
+    unlockAudio();
+    if (phase === "ready") beginRun();
+    else retry();
   });
 
   const host = root as HTMLElement & { __breakoutCleanup?: () => void };
@@ -260,5 +306,5 @@ export function renderBreakout(root: HTMLElement): void {
     window.removeEventListener("keyup", onKeyUp);
   };
 
-  start();
+  resetReady();
 }

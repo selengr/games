@@ -17,6 +17,30 @@ Shared mute, daily challenge, badge strip, best scores row, recent plays, soft P
 
 https://selengr.github.io/arcade-hub/
 
+## Screenshots
+
+### Hub
+
+![Arcade Hub home](docs/screenshots/hub.png)
+
+### Games
+
+| Snake | Flappy Lite |
+| --- | --- |
+| ![Snake](docs/screenshots/snake.png) | ![Flappy Lite](docs/screenshots/flappy.png) |
+
+| Breakout | Balloon Pop |
+| --- | --- |
+| ![Breakout](docs/screenshots/breakout.png) | ![Balloon Pop](docs/screenshots/balloons.png) |
+
+| Whack-a-Mole | Reaction Duel |
+| --- | --- |
+| ![Whack-a-Mole](docs/screenshots/mole.png) | ![Reaction Duel](docs/screenshots/reaction.png) |
+
+| Tic-Tac-Toe | Memory |
+| --- | --- |
+| ![Tic-Tac-Toe](docs/screenshots/tictactoe.png) | ![Memory](docs/screenshots/memory.png) |
+
 ## Run locally
 
 ```bash
@@ -35,6 +59,17 @@ npm test
 ```bash
 npm run build
 npm run preview
+```
+
+## Screenshots (regenerate)
+
+With preview running on port 4173:
+
+```bash
+npm run build
+npx vite preview --host 127.0.0.1 --port 4173
+# then in another terminal:
+node scripts/capture-screenshots.mjs
 ```
 
 ## Deploy

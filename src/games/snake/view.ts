@@ -50,8 +50,10 @@ export function renderSnake(root: HTMLElement): void {
       phase === "paused"
         ? "Paused"
         : phase === "over"
-          ? `Score ${score}`
-          : "Go!";
+          ? `Score ${score} — tap Start to retry`
+          : phase === "ready"
+            ? "Press Start or a direction"
+            : "Go!";
 
     root.innerHTML = `
       <div class="shell route-fade">
@@ -76,7 +78,7 @@ export function renderSnake(root: HTMLElement): void {
                   ? `<button class="btn btn-ghost" type="button" data-pause>Pause</button>`
                   : phase === "paused"
                     ? `<button class="btn btn-primary" type="button" data-resume>Resume</button>`
-                    : `<button class="btn btn-primary" type="button" data-start>${phase === "over" ? "Play again" : "Start"}</button>`
+                    : `<button class="btn btn-primary" type="button" data-start>${phase === "over" ? "Retry run" : "Start"}</button>`
               }
             </div>
             <div class="snake-pad" aria-label="Controls">
@@ -119,6 +121,13 @@ export function renderSnake(root: HTMLElement): void {
     });
 
     const canvas = root.querySelector<HTMLCanvasElement>(".snake-canvas");
+    canvas?.addEventListener("pointerdown", () => {
+      if (phase === "ready" || phase === "over") {
+        unlockAudio();
+        sfx.tap();
+        reset(true);
+      }
+    });
     canvas?.addEventListener(
       "touchstart",
       (e) => {

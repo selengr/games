@@ -8,6 +8,7 @@ import {
   startDailyRun,
 } from "../shared/daily";
 import { formatWhen, getHistory } from "../shared/history";
+import { routeFromHistoryTitle } from "../shared/historyRoutes";
 import { ACHIEVEMENTS, unlockedIds } from "../shared/achievements";
 import {
   dismissInstallTip,
@@ -153,15 +154,26 @@ export function renderHub(root: HTMLElement): void {
         recent.length
           ? `<section class="panel recent-plays" aria-label="Recent plays">
               <h2>Recent plays</h2>
+              <p class="hint">Tap a row to play again.</p>
               <ul class="history-list">
                 ${recent
-                  .map(
-                    (entry) => `
-                  <li>
+                  .map((entry) => {
+                    const route = routeFromHistoryTitle(entry.game);
+                    if (!route) {
+                      return `
+                  <li class="history-static">
                     <span><strong>${entry.game}</strong> · ${entry.summary}</span>
                     <span class="when">${formatWhen(entry.at)}</span>
-                  </li>`,
-                  )
+                  </li>`;
+                    }
+                    return `
+                  <li>
+                    <button class="history-replay" type="button" data-replay="${route}">
+                      <span><strong>${entry.game}</strong> · ${entry.summary}</span>
+                      <span class="when">${formatWhen(entry.at)}</span>
+                    </button>
+                  </li>`;
+                  })
                   .join("")}
               </ul>
             </section>`
@@ -207,6 +219,15 @@ export function renderHub(root: HTMLElement): void {
       unlockAudio();
       sfx.tap();
       const route = btn.dataset.route as Exclude<Route, "hub">;
+      setRoute(route);
+    });
+  });
+
+  root.querySelectorAll<HTMLButtonElement>("[data-replay]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      unlockAudio();
+      sfx.tap();
+      const route = btn.dataset.replay as Exclude<Route, "hub">;
       setRoute(route);
     });
   });

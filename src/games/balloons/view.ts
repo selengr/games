@@ -37,7 +37,11 @@ export function renderBalloons(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Balloon Pop</h2>
-        <p class="hint">Tap balloons before they float away. Keep a streak going!</p>
+        <ol class="game-how">
+          <li>Tap balloons before they float off the top.</li>
+          <li>Pop quickly to build a <strong>streak</strong> for bonus points.</li>
+          <li>You lose a life for each balloon that escapes.</li>
+        </ol>
         <div class="scoreboard">
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-lives>Lives 3</span>

@@ -86,15 +86,16 @@ function bestsRowHtml(): string {
     <section class="panel bests-row" aria-label="Best scores">
       <div class="badge-strip-head">
         <h2>Best scores</h2>
+        <span class="count">Tap to replay</span>
       </div>
       <div class="bests-rail">
         ${bests
           .map(
             (b) => `
-          <div class="best-chip">
+          <button class="best-chip" type="button" data-best-route="${b.route}">
             <span>${b.label}</span>
             <strong>${b.value}</strong>
-          </div>`,
+          </button>`,
           )
           .join("")}
       </div>
@@ -220,6 +221,15 @@ export function renderHub(root: HTMLElement): void {
       unlockAudio();
       sfx.tap();
       const route = btn.dataset.route as Exclude<Route, "hub">;
+      setRoute(route);
+    });
+  });
+
+  root.querySelectorAll<HTMLButtonElement>("[data-best-route]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      unlockAudio();
+      sfx.tap();
+      const route = btn.dataset.bestRoute as Exclude<Route, "hub">;
       setRoute(route);
     });
   });

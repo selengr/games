@@ -25,10 +25,21 @@ describe("flappy lite", () => {
     expect(state.alive).toBe(false);
   });
 
-  it("uses tighter gaps on hard", () => {
+  it("keeps hard challenging but more readable than easy", () => {
     expect(FLAPPY_CONFIG.hard.pipeGap).toBeLessThan(FLAPPY_CONFIG.easy.pipeGap);
     expect(FLAPPY_CONFIG.hard.pipeSpeed).toBeGreaterThan(
       FLAPPY_CONFIG.easy.pipeSpeed,
     );
+    expect(FLAPPY_CONFIG.hard.centerBias).toBeGreaterThan(
+      FLAPPY_CONFIG.normal.centerBias,
+    );
+    expect(FLAPPY_CONFIG.hard.maxFall).toBeGreaterThan(0);
+  });
+
+  it("caps fall speed on hard", () => {
+    const state = createFlappy(320, 480, "hard");
+    state.bird.vy = 40;
+    stepFlappy(state);
+    expect(state.bird.vy).toBeLessThanOrEqual(FLAPPY_CONFIG.hard.maxFall);
   });
 });

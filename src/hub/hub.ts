@@ -1,7 +1,7 @@
 import { setRoute, type Route } from "../shared/router";
 import { bindChrome, renderChrome } from "../shared/chrome";
 import { unlockAudio, sfx } from "../shared/audio";
-import { getSettings } from "../shared/settings";
+import { getSettings, setFlappyDiff } from "../shared/settings";
 import {
   getDailyChallenge,
   isDailyDone,
@@ -9,6 +9,7 @@ import {
 } from "../shared/daily";
 import { formatWhen, getHistory } from "../shared/history";
 import { routeFromHistoryTitle } from "../shared/historyRoutes";
+import { parseFlappyDiff } from "../games/flappy/logic";
 import { ACHIEVEMENTS, unlockedIds } from "../shared/achievements";
 import {
   dismissInstallTip,
@@ -168,7 +169,7 @@ export function renderHub(root: HTMLElement): void {
                     }
                     return `
                   <li>
-                    <button class="history-replay" type="button" data-replay="${route}">
+                    <button class="history-replay" type="button" data-replay="${route}" data-summary="${entry.summary.replace(/"/g, "&quot;")}">
                       <span><strong>${entry.game}</strong> · ${entry.summary}</span>
                       <span class="when">${formatWhen(entry.at)}</span>
                     </button>
@@ -228,6 +229,10 @@ export function renderHub(root: HTMLElement): void {
       unlockAudio();
       sfx.tap();
       const route = btn.dataset.replay as Exclude<Route, "hub">;
+      if (route === "flappy") {
+        const diff = parseFlappyDiff(btn.dataset.summary ?? "");
+        if (diff) setFlappyDiff(diff);
+      }
       setRoute(route);
     });
   });

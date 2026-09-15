@@ -20,7 +20,7 @@ const defaults: Settings = {
   lastGame: null,
   snakeSpeed: "normal",
   snakeWrap: false,
-  flappyDiff: "normal",
+  flappyDiff: "easy",
 };
 
 export function getSettings(): Settings {

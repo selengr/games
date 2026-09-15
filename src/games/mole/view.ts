@@ -39,7 +39,11 @@ export function renderMole(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Whack-a-Mole</h2>
-        <p class="hint">Tap moles when they pop up. You have 30 seconds!</p>
+        <ol class="game-how">
+          <li>Watch the holes — moles pop up for a short time.</li>
+          <li>Tap a mole while it's up to score.</li>
+          <li>You have <strong>30 seconds</strong>. Speed rises as you score.</li>
+        </ol>
         <div class="scoreboard">
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-time>Time 30</span>

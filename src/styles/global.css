@@ -450,9 +450,39 @@ a {
   gap: 0.75rem;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 0.55rem 0.75rem;
+  padding: 0;
   background: rgba(11, 31, 36, 0.4);
   font-size: 0.9rem;
+  overflow: hidden;
+}
+
+.history-list li.history-static {
+  padding: 0.55rem 0.75rem;
+}
+
+.history-replay {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.history-replay:hover {
+  background: rgba(200, 245, 66, 0.08);
+}
+
+.history-replay:focus-visible {
+  outline: 2px solid rgba(200, 245, 66, 0.55);
+  outline-offset: -2px;
 }
 
 .history-list .when {

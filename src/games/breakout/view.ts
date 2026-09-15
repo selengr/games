@@ -35,7 +35,11 @@ export function renderBreakout(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Breakout</h2>
-        <p class="hint">Drag or use ← → to keep the ball up. Clear every brick!</p>
+        <ol class="game-how">
+          <li>Drag on the board (or press <strong>← →</strong> / A D) to move the paddle.</li>
+          <li>Bounce the ball so it stays in play.</li>
+          <li>Break every brick to clear the level.</li>
+        </ol>
         <div class="scoreboard">
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-lives>Lives 3</span>

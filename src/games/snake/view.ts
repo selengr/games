@@ -58,6 +58,11 @@ export function renderSnake(root: HTMLElement): void {
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Snake</h2>
+          <ol class="game-how">
+            <li>Press <strong>Start</strong> (or swipe / pad / WASD / arrows).</li>
+            <li>Eat the dots to grow and score.</li>
+            <li>Don't hit the walls or yourself.</li>
+          </ol>
           <div class="scoreboard">
             <span class="score-pill">Score ${score}</span>
             <span class="score-pill">Best ${best}</span>

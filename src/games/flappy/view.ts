@@ -37,7 +37,7 @@ export function renderFlappy(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Flappy Lite</h2>
-        <ol class="flappy-how">
+        <ol class="game-how">
           <li>Press the big <strong>Flap</strong> button (or Space / ↑ / W).</li>
           <li>Keep flapping so the bird stays in the air.</li>
           <li>Fly through the gaps between the pipes.</li>

@@ -2,8 +2,20 @@
   width: min(420px, 100%);
 }
 
+.flappy-how {
+  margin: 0.35rem 0 0.85rem;
+  padding-left: 1.15rem;
+  color: var(--mist);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.flappy-how strong {
+  color: var(--foam);
+}
+
 .flappy-diffs {
-  margin: 0.65rem 0 0.85rem;
+  margin: 0.35rem 0 0.85rem;
   flex-wrap: wrap;
 }
 
@@ -21,12 +33,37 @@
   -webkit-user-select: none;
 }
 
+.flappy-canvas:focus-visible {
+  outline: 2px solid rgba(200, 245, 66, 0.55);
+  outline-offset: 2px;
+}
+
+.flappy-controls {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+  width: min(420px, 100%);
+}
+
+.flappy-flap {
+  min-height: 3.4rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  width: 100%;
+}
+
 @media (max-width: 719px) {
-  .flappy-wrap {
+  .flappy-wrap,
+  .flappy-controls {
     width: min(100%, 94vw);
   }
 
   .flappy-canvas {
     border-radius: 14px;
+  }
+
+  .flappy-flap {
+    min-height: 3.75rem;
+    font-size: 1.2rem;
   }
 }

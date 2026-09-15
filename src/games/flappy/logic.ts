@@ -22,6 +22,10 @@ export type FlappyConfig = {
   pipeGap: number;
   pipeEvery: number;
   pipeW: number;
+  /** Cap downward speed so hard doesn't feel like an instant dive. */
+  maxFall: number;
+  /** 0 = fully random gaps; 1 = strongly prefer center. */
+  centerBias: number;
 };
 
 export type FlappyState = {
@@ -46,6 +50,8 @@ export const FLAPPY_CONFIG: Record<FlappyDiff, FlappyConfig> = {
     pipeGap: 152,
     pipeEvery: 125,
     pipeW: 48,
+    maxFall: 7.5,
+    centerBias: 0.15,
   },
   normal: {
     gravity: 0.28,
@@ -54,14 +60,18 @@ export const FLAPPY_CONFIG: Record<FlappyDiff, FlappyConfig> = {
     pipeGap: 128,
     pipeEvery: 110,
     pipeW: 52,
+    maxFall: 8.2,
+    centerBias: 0.25,
   },
   hard: {
-    gravity: 0.34,
-    flapV: -5.5,
-    pipeSpeed: 3.05,
-    pipeGap: 108,
-    pipeEvery: 92,
-    pipeW: 56,
+    gravity: 0.31,
+    flapV: -5.35,
+    pipeSpeed: 2.85,
+    pipeGap: 116,
+    pipeEvery: 100,
+    pipeW: 54,
+    maxFall: 8.6,
+    centerBias: 0.55,
   },
 };
 
@@ -94,11 +104,25 @@ export function flap(state: FlappyState): void {
   state.bird.vy = state.config.flapV;
 }
 
+function pickGapY(
+  height: number,
+  gapH: number,
+  centerBias: number,
+  rand = Math.random,
+): number {
+  const margin = 52;
+  const minY = margin;
+  const maxY = height - margin - gapH;
+  const span = Math.max(1, maxY - minY);
+  const raw = rand();
+  const centered = 0.5 + (raw - 0.5) * (1 - centerBias);
+  const t = Math.min(1, Math.max(0, centered));
+  return minY + t * span;
+}
+
 function spawnPipe(state: FlappyState): void {
-  const margin = 48;
   const gapH = state.config.pipeGap;
-  const maxTop = state.height - margin - gapH;
-  const gapY = margin + Math.random() * Math.max(20, maxTop - margin);
+  const gapY = pickGapY(state.height, gapH, state.config.centerBias);
   state.pipes.push({
     x: state.width + 10,
     gapY,
@@ -120,8 +144,8 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
   if (!state.alive) return "die";
 
   const bird = state.bird;
-  const { gravity, pipeSpeed, pipeEvery } = state.config;
-  bird.vy += gravity;
+  const { gravity, pipeSpeed, pipeEvery, maxFall } = state.config;
+  bird.vy = Math.min(maxFall, bird.vy + gravity);
   bird.y += bird.vy;
 
   if (bird.y + bird.r >= state.height || bird.y - bird.r <= 0) {

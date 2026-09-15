@@ -44,6 +44,11 @@ export function renderMemory(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Memory</h2>
+        <ol class="game-how">
+          <li>Tap a card to flip it.</li>
+          <li>Flip a second card — matching pairs stay open.</li>
+          <li>Clear the board in as few <strong>moves</strong> as you can.</li>
+        </ol>
         <div class="scoreboard">
           <span class="score-pill" data-moves>Moves 0</span>
           <span class="score-pill" data-best ${best ? "" : "hidden"}>Best ${best?.moves ?? ""}</span>

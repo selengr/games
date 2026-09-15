@@ -1,9 +1,11 @@
 import { loadJson } from "./storage";
+import type { Route } from "./router";
 import { flappyBestKey, type FlappyDiff } from "../games/flappy/logic";
 
 export type HubBest = {
   label: string;
   value: string;
+  route: Exclude<Route, "hub">;
 };
 
 function flappyBest(): number {
@@ -42,27 +44,43 @@ export function getHubBests(): HubBest[] {
   const items: HubBest[] = [];
 
   const snake = snakeBest();
-  if (snake > 0) items.push({ label: "Snake", value: String(snake) });
+  if (snake > 0) {
+    items.push({ label: "Snake", value: String(snake), route: "snake" });
+  }
 
   const flappy = flappyBest();
-  if (flappy > 0) items.push({ label: "Flappy", value: String(flappy) });
+  if (flappy > 0) {
+    items.push({ label: "Flappy", value: String(flappy), route: "flappy" });
+  }
 
   const breakout = loadJson<number>("arcade-breakout-best", 0);
-  if (breakout > 0) items.push({ label: "Breakout", value: String(breakout) });
+  if (breakout > 0) {
+    items.push({ label: "Breakout", value: String(breakout), route: "breakout" });
+  }
 
   const balloons = loadJson<number>("arcade-balloons-best", 0);
-  if (balloons > 0) items.push({ label: "Balloons", value: String(balloons) });
+  if (balloons > 0) {
+    items.push({ label: "Balloons", value: String(balloons), route: "balloons" });
+  }
 
   const mole = loadJson<number>("arcade-mole-best", 0);
-  if (mole > 0) items.push({ label: "Mole", value: String(mole) });
+  if (mole > 0) {
+    items.push({ label: "Mole", value: String(mole), route: "mole" });
+  }
 
   const reaction = loadJson<number>("arcade-reaction-best", 0);
-  if (reaction > 0) items.push({ label: "Reaction", value: `${reaction}W` });
+  if (reaction > 0) {
+    items.push({ label: "Reaction", value: `${reaction}W`, route: "reaction" });
+  }
 
-  if (ttt.wins > 0) items.push({ label: "TTT", value: `${ttt.wins}W` });
+  if (ttt.wins > 0) {
+    items.push({ label: "TTT", value: `${ttt.wins}W`, route: "tictactoe" });
+  }
 
   const memory = memoryBest();
-  if (memory) items.push({ label: "Memory", value: memory });
+  if (memory) {
+    items.push({ label: "Memory", value: memory, route: "memory" });
+  }
 
   return items;
 }

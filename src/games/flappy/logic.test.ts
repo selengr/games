@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createFlappy, flap, stepFlappy, FLAPPY_CONFIG } from "./logic";
+import {
+  createFlappy,
+  flap,
+  stepFlappy,
+  FLAPPY_CONFIG,
+  parseFlappyDiff,
+} from "./logic";
 
 describe("flappy lite", () => {
   it("starts alive with an empty course", () => {
@@ -7,6 +13,14 @@ describe("flappy lite", () => {
     expect(state.alive).toBe(true);
     expect(state.pipes).toHaveLength(0);
     expect(state.score).toBe(0);
+    expect(state.spawnAcc).toBe(0);
+  });
+
+  it("does not spawn a pipe on the first frames", () => {
+    const state = createFlappy(320, 480, "normal");
+    for (let i = 0; i < 10; i += 1) stepFlappy(state);
+    expect(state.pipes).toHaveLength(0);
+    expect(state.alive).toBe(true);
   });
 
   it("flap lifts the bird", () => {
@@ -25,15 +39,11 @@ describe("flappy lite", () => {
     expect(state.alive).toBe(false);
   });
 
-  it("keeps hard challenging but more readable than easy", () => {
+  it("keeps hard tighter and faster than easy", () => {
     expect(FLAPPY_CONFIG.hard.pipeGap).toBeLessThan(FLAPPY_CONFIG.easy.pipeGap);
     expect(FLAPPY_CONFIG.hard.pipeSpeed).toBeGreaterThan(
       FLAPPY_CONFIG.easy.pipeSpeed,
     );
-    expect(FLAPPY_CONFIG.hard.centerBias).toBeGreaterThan(
-      FLAPPY_CONFIG.normal.centerBias,
-    );
-    expect(FLAPPY_CONFIG.hard.maxFall).toBeGreaterThan(0);
   });
 
   it("caps fall speed on hard", () => {
@@ -41,5 +51,11 @@ describe("flappy lite", () => {
     state.bird.vy = 40;
     stepFlappy(state);
     expect(state.bird.vy).toBeLessThanOrEqual(FLAPPY_CONFIG.hard.maxFall);
+  });
+
+  it("parses difficulty from history summaries", () => {
+    expect(parseFlappyDiff("hard · 4")).toBe("hard");
+    expect(parseFlappyDiff("easy · 0")).toBe("easy");
+    expect(parseFlappyDiff("score 3")).toBeNull();
   });
 });

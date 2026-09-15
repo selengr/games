@@ -65,7 +65,7 @@ export function renderMemory(root: HTMLElement): void {
           `).join("")}
         </div>
         <div class="row">
-          <button class="btn btn-primary" type="button" data-reset>New game</button>
+          <button class="btn btn-primary" type="button" data-reset>New game / Retry</button>
         </div>
       </section>
     </div>
@@ -121,7 +121,11 @@ export function renderMemory(root: HTMLElement): void {
       );
     });
 
-    if (statusEl) statusEl.textContent = done ? "You did it!" : "Find the pairs";
+    if (statusEl) {
+      statusEl.textContent = done
+        ? "You did it! — New game to play again"
+        : "Find the pairs — tap two cards";
+    }
     if (movesEl) movesEl.textContent = `Moves ${moves}`;
     if (bestEl) {
       if (best) {

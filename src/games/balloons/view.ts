@@ -52,7 +52,7 @@ export function renderBalloons(root: HTMLElement): void {
           <canvas class="balloons-canvas" width="360" height="480" aria-label="Balloon Pop"></canvas>
         </div>
         <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Play again</button>
+          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
         </div>
       </section>
     </div>
@@ -78,7 +78,8 @@ export function renderBalloons(root: HTMLElement): void {
     if (livesEl) livesEl.textContent = `Lives ${lives}`;
     if (bestEl) bestEl.textContent = `Best ${best}`;
     if (statusEl) {
-      statusEl.textContent = phase === "over" ? "Game over" : runningStatus();
+      statusEl.textContent =
+        phase === "over" ? "Game over — tap to retry" : runningStatus();
     }
     if (againBtn) againBtn.hidden = phase === "running";
   };
@@ -177,9 +178,15 @@ export function renderBalloons(root: HTMLElement): void {
   canvas?.addEventListener(
     "pointerdown",
     (e) => {
-      if (phase !== "running" || !canvas) return;
+      if (!canvas) return;
       e.preventDefault();
       unlockAudio();
+      if (phase === "over") {
+        sfx.tap();
+        start();
+        return;
+      }
+      if (phase !== "running") return;
       const rect = canvas.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
       const y = ((e.clientY - rect.top) / rect.height) * canvas.height;

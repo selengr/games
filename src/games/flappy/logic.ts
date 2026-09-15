@@ -42,34 +42,34 @@ export const FLAPPY_DIFFS: FlappyDiff[] = ["easy", "normal", "hard"];
 
 export const FLAPPY_CONFIG: Record<FlappyDiff, FlappyConfig> = {
   easy: {
-    gravity: 0.22,
-    flapV: -4.8,
-    pipeSpeed: 1.85,
-    pipeGap: 156,
-    pipeEvery: 130,
-    pipeW: 48,
-    maxFall: 7.2,
-    centerBias: 0.2,
+    gravity: 0.16,
+    flapV: -4.2,
+    pipeSpeed: 1.45,
+    pipeGap: 178,
+    pipeEvery: 150,
+    pipeW: 46,
+    maxFall: 5.5,
+    centerBias: 0.35,
   },
   normal: {
-    gravity: 0.27,
-    flapV: -5.1,
-    pipeSpeed: 2.25,
-    pipeGap: 134,
-    pipeEvery: 115,
-    pipeW: 52,
-    maxFall: 7.8,
+    gravity: 0.24,
+    flapV: -4.9,
+    pipeSpeed: 2.05,
+    pipeGap: 142,
+    pipeEvery: 120,
+    pipeW: 50,
+    maxFall: 7.0,
     centerBias: 0.3,
   },
   hard: {
-    gravity: 0.3,
-    flapV: -5.25,
-    pipeSpeed: 2.7,
-    pipeGap: 120,
-    pipeEvery: 102,
-    pipeW: 54,
-    maxFall: 8.2,
-    centerBias: 0.5,
+    gravity: 0.29,
+    flapV: -5.2,
+    pipeSpeed: 2.55,
+    pipeGap: 124,
+    pipeEvery: 105,
+    pipeW: 52,
+    maxFall: 7.8,
+    centerBias: 0.45,
   },
 };
 
@@ -190,4 +190,18 @@ export function parseFlappyDiff(text: string): FlappyDiff | null {
   const match = /\b(easy|normal|hard)\b/i.exec(text);
   if (!match) return null;
   return match[1]!.toLowerCase() as FlappyDiff;
+}
+
+/** Keys that flap / start / retry. */
+export function isFlapKey(e: KeyboardEvent): boolean {
+  return (
+    e.code === "Space" ||
+    e.key === " " ||
+    e.code === "ArrowUp" ||
+    e.code === "KeyW" ||
+    e.key === "w" ||
+    e.key === "W" ||
+    e.code === "Enter" ||
+    e.key === "Enter"
+  );
 }

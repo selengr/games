@@ -50,7 +50,7 @@ export function renderBreakout(root: HTMLElement): void {
           <canvas class="breakout-canvas" width="480" height="360" aria-label="Breakout"></canvas>
         </div>
         <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Play again</button>
+          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
         </div>
       </section>
     </div>
@@ -73,9 +73,9 @@ export function renderBreakout(root: HTMLElement): void {
     if (statusEl) {
       statusEl.textContent =
         phase === "clear"
-          ? "All clear!"
+          ? "All clear! Tap to retry"
           : phase === "over"
-            ? "Game over"
+            ? "Game over — tap to retry"
             : "Drag or use arrows";
     }
     if (againBtn) againBtn.hidden = phase === "running";
@@ -195,6 +195,11 @@ export function renderBreakout(root: HTMLElement): void {
     (e) => {
       unlockAudio();
       e.preventDefault();
+      if (phase === "over" || phase === "clear") {
+        sfx.tap();
+        start();
+        return;
+      }
       pointerActive = true;
       canvas.setPointerCapture(e.pointerId);
       pointer(e.clientX);

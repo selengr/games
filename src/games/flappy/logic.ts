@@ -22,9 +22,7 @@ export type FlappyConfig = {
   pipeGap: number;
   pipeEvery: number;
   pipeW: number;
-  /** Cap downward speed so hard doesn't feel like an instant dive. */
   maxFall: number;
-  /** 0 = fully random gaps; 1 = strongly prefer center. */
   centerBias: number;
 };
 
@@ -46,32 +44,32 @@ export const FLAPPY_CONFIG: Record<FlappyDiff, FlappyConfig> = {
   easy: {
     gravity: 0.22,
     flapV: -4.8,
-    pipeSpeed: 1.9,
-    pipeGap: 152,
-    pipeEvery: 125,
+    pipeSpeed: 1.85,
+    pipeGap: 156,
+    pipeEvery: 130,
     pipeW: 48,
-    maxFall: 7.5,
-    centerBias: 0.15,
+    maxFall: 7.2,
+    centerBias: 0.2,
   },
   normal: {
-    gravity: 0.28,
-    flapV: -5.2,
-    pipeSpeed: 2.4,
-    pipeGap: 128,
-    pipeEvery: 110,
+    gravity: 0.27,
+    flapV: -5.1,
+    pipeSpeed: 2.25,
+    pipeGap: 134,
+    pipeEvery: 115,
     pipeW: 52,
-    maxFall: 8.2,
-    centerBias: 0.25,
+    maxFall: 7.8,
+    centerBias: 0.3,
   },
   hard: {
-    gravity: 0.31,
-    flapV: -5.35,
-    pipeSpeed: 2.85,
-    pipeGap: 116,
-    pipeEvery: 100,
+    gravity: 0.3,
+    flapV: -5.25,
+    pipeSpeed: 2.7,
+    pipeGap: 120,
+    pipeEvery: 102,
     pipeW: 54,
-    maxFall: 8.6,
-    centerBias: 0.55,
+    maxFall: 8.2,
+    centerBias: 0.5,
   },
 };
 
@@ -93,7 +91,7 @@ export function createFlappy(
     width,
     height,
     alive: true,
-    spawnAcc: config.pipeEvery - 20,
+    spawnAcc: 0,
     difficulty,
     config,
   };
@@ -110,7 +108,7 @@ function pickGapY(
   centerBias: number,
   rand = Math.random,
 ): number {
-  const margin = 52;
+  const margin = 56;
   const minY = margin;
   const maxY = height - margin - gapH;
   const span = Math.max(1, maxY - minY);
@@ -124,7 +122,7 @@ function spawnPipe(state: FlappyState): void {
   const gapH = state.config.pipeGap;
   const gapY = pickGapY(state.height, gapH, state.config.centerBias);
   state.pipes.push({
-    x: state.width + 10,
+    x: state.width + 8,
     gapY,
     gapH,
     w: state.config.pipeW,
@@ -132,12 +130,18 @@ function spawnPipe(state: FlappyState): void {
   });
 }
 
+/** Slightly smaller than the drawn bird so hits feel fair. */
+function hitRadius(bird: Bird): number {
+  return bird.r * 0.82;
+}
+
 function hitsPipe(bird: Bird, pipe: Pipe): boolean {
-  const inX = bird.x + bird.r > pipe.x && bird.x - bird.r < pipe.x + pipe.w;
+  const r = hitRadius(bird);
+  const inX = bird.x + r > pipe.x && bird.x - r < pipe.x + pipe.w;
   if (!inX) return false;
   const top = pipe.gapY;
   const bottom = pipe.gapY + pipe.gapH;
-  return bird.y - bird.r < top || bird.y + bird.r > bottom;
+  return bird.y - r < top || bird.y + r > bottom;
 }
 
 export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
@@ -148,7 +152,8 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
   bird.vy = Math.min(maxFall, bird.vy + gravity);
   bird.y += bird.vy;
 
-  if (bird.y + bird.r >= state.height || bird.y - bird.r <= 0) {
+  const r = hitRadius(bird);
+  if (bird.y + r >= state.height || bird.y - r <= 0) {
     state.alive = false;
     return "die";
   }
@@ -162,7 +167,7 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
   let scored = false;
   for (const pipe of state.pipes) {
     pipe.x -= pipeSpeed;
-    if (!pipe.scored && pipe.x + pipe.w < bird.x) {
+    if (!pipe.scored && pipe.x + pipe.w < bird.x - r) {
       pipe.scored = true;
       state.score += 1;
       scored = true;
@@ -173,10 +178,16 @@ export function stepFlappy(state: FlappyState): "play" | "score" | "die" {
     }
   }
 
-  state.pipes = state.pipes.filter((p) => p.x + p.w > -20);
+  state.pipes = state.pipes.filter((p) => p.x + p.w > -24);
   return scored ? "score" : "play";
 }
 
 export function flappyBestKey(diff: FlappyDiff): string {
   return `arcade-flappy-best-${diff}`;
+}
+
+export function parseFlappyDiff(text: string): FlappyDiff | null {
+  const match = /\b(easy|normal|hard)\b/i.exec(text);
+  if (!match) return null;
+  return match[1]!.toLowerCase() as FlappyDiff;
 }

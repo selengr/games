@@ -70,7 +70,11 @@ export function renderReaction(root: HTMLElement): void {
         ${renderChrome({ showBack: true })}
         <section class="panel">
           <h2>Reaction Duel</h2>
-          <p class="hint">Wait for GO, then tap faster than the rival. First to 5.</p>
+          <ol class="game-how">
+            <li>Wait on <strong>WAIT</strong> — don't tap yet.</li>
+            <li>When it says <strong>GO!</strong>, tap the arena as fast as you can.</li>
+            <li>Beat the rival. First to <strong>5</strong> wins the match.</li>
+          </ol>
           <div class="scoreboard">
             <span class="score-pill" data-you>You ${match.you}</span>
             <span class="score-pill" data-rival>Rival ${match.rival}</span>

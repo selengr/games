@@ -61,7 +61,7 @@ export function renderMole(root: HTMLElement): void {
             .join("")}
         </div>
         <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Play again</button>
+          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
         </div>
       </section>
     </div>
@@ -93,7 +93,7 @@ export function renderMole(root: HTMLElement): void {
     if (statusEl) {
       statusEl.textContent =
         phase === "over"
-          ? `Time's up · ${score}`
+          ? `Time's up · ${score} — tap to retry`
           : streak >= 3
             ? `${streak} streak!`
             : "Whack!";
@@ -168,9 +168,14 @@ export function renderMole(root: HTMLElement): void {
 
   holeButtons.forEach((btn) => {
     btn.addEventListener("pointerdown", (e) => {
-      if (phase !== "running") return;
       e.preventDefault();
       unlockAudio();
+      if (phase === "over") {
+        sfx.tap();
+        start();
+        return;
+      }
+      if (phase !== "running") return;
       const id = Number(btn.dataset.hole);
       if (!whack(holes, id)) {
         streak = 0;

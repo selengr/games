@@ -5,6 +5,7 @@ import {
   stepFlappy,
   FLAPPY_CONFIG,
   parseFlappyDiff,
+  isFlapKey,
 } from "./logic";
 
 describe("flappy lite", () => {
@@ -57,5 +58,13 @@ describe("flappy lite", () => {
     expect(parseFlappyDiff("hard · 4")).toBe("hard");
     expect(parseFlappyDiff("easy · 0")).toBe("easy");
     expect(parseFlappyDiff("score 3")).toBeNull();
+  });
+
+  it("recognizes flap keys", () => {
+    expect(isFlapKey({ code: "Space", key: " " } as KeyboardEvent)).toBe(true);
+    expect(isFlapKey({ code: "ArrowUp", key: "ArrowUp" } as KeyboardEvent)).toBe(
+      true,
+    );
+    expect(isFlapKey({ code: "KeyA", key: "a" } as KeyboardEvent)).toBe(false);
   });
 });

@@ -11,6 +11,7 @@ import {
   createFlappy,
   flap,
   flappyBestKey,
+  isFlapKey,
   stepFlappy,
   type FlappyDiff,
   type FlappyState,
@@ -36,7 +37,11 @@ export function renderFlappy(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel">
         <h2>Flappy Lite</h2>
-        <p class="hint">Tap or Space to flap. First tap starts the run.</p>
+        <ol class="flappy-how">
+          <li>Press the big <strong>Flap</strong> button (or Space / ↑ / W).</li>
+          <li>Keep flapping so the bird stays in the air.</li>
+          <li>Fly through the gaps between the pipes.</li>
+        </ol>
         <div class="row flappy-diffs" role="group" aria-label="Difficulty">
           ${FLAPPY_DIFFS.map(
             (d) => `
@@ -49,12 +54,13 @@ export function renderFlappy(root: HTMLElement): void {
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-best>Best ${best}</span>
         </div>
-        <p class="status" data-status aria-live="polite">Tap to start</p>
+        <p class="status" data-status aria-live="polite">Press Flap to start</p>
         <div class="flappy-wrap">
-          <canvas class="flappy-canvas" width="360" height="540" aria-label="Flappy Lite"></canvas>
+          <canvas class="flappy-canvas" width="360" height="540" tabindex="0" aria-label="Flappy Lite play area"></canvas>
         </div>
-        <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
+        <div class="flappy-controls">
+          <button class="btn btn-primary flappy-flap" type="button" data-flap>Flap</button>
+          <button class="btn btn-ghost" type="button" data-again hidden>Retry run</button>
         </div>
       </section>
     </div>
@@ -67,6 +73,7 @@ export function renderFlappy(root: HTMLElement): void {
   const bestEl = root.querySelector<HTMLElement>("[data-best]");
   const statusEl = root.querySelector<HTMLElement>("[data-status]");
   const againBtn = root.querySelector<HTMLButtonElement>("[data-again]");
+  const flapBtn = root.querySelector<HTMLButtonElement>("[data-flap]");
 
   const syncDiffButtons = (): void => {
     root.querySelectorAll<HTMLButtonElement>("[data-diff]").forEach((btn) => {
@@ -82,12 +89,16 @@ export function renderFlappy(root: HTMLElement): void {
     if (statusEl) {
       statusEl.textContent =
         phase === "ready"
-          ? "Tap to start"
+          ? "Press Flap to start"
           : phase === "over"
-            ? "Crashed — tap to retry"
-            : "Flap!";
+            ? "Crashed — press Flap to retry"
+            : "Keep pressing Flap!";
     }
     if (againBtn) againBtn.hidden = phase !== "over";
+    if (flapBtn) {
+      flapBtn.textContent =
+        phase === "ready" ? "Start · Flap" : phase === "over" ? "Retry · Flap" : "Flap";
+    }
   };
 
   const draw = (): void => {
@@ -127,10 +138,13 @@ export function renderFlappy(root: HTMLElement): void {
     ctx.fill();
 
     if (phase === "ready") {
-      ctx.fillStyle = "rgba(232, 244, 241, 0.9)";
-      ctx.font = "700 22px Syne, sans-serif";
+      ctx.fillStyle = "rgba(232, 244, 241, 0.92)";
+      ctx.font = "700 20px Syne, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Tap to start", canvas.width / 2, canvas.height * 0.62);
+      ctx.fillText("Press Flap to fly", canvas.width / 2, canvas.height * 0.58);
+      ctx.font = "600 14px Outfit, sans-serif";
+      ctx.fillStyle = "rgba(155, 184, 176, 0.95)";
+      ctx.fillText("or Space / ↑ / W", canvas.width / 2, canvas.height * 0.64);
     }
   };
 
@@ -229,10 +243,16 @@ export function renderFlappy(root: HTMLElement): void {
     "pointerdown",
     (e) => {
       e.preventDefault();
+      canvas.focus();
       onPlayInput();
     },
     { passive: false },
   );
+
+  flapBtn?.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    onPlayInput();
+  });
 
   againBtn?.addEventListener("click", () => {
     sfx.tap();
@@ -253,7 +273,7 @@ export function renderFlappy(root: HTMLElement): void {
   });
 
   const onKey = (e: KeyboardEvent): void => {
-    if (e.code !== "Space" && e.key !== " ") return;
+    if (!isFlapKey(e)) return;
     e.preventDefault();
     onPlayInput();
   };
@@ -267,4 +287,7 @@ export function renderFlappy(root: HTMLElement): void {
   };
 
   resetReady();
+  // Prefer Easy for first-time players who somehow have no preference stored
+  // already handled via settings default; focus canvas so keys work after click.
+  canvas?.focus();
 }

@@ -53,6 +53,11 @@ export function renderTicTacToe(root: HTMLElement): void {
       ${renderChrome({ showBack: true })}
       <section class="panel ttt-panel">
         <h2>Tic-Tac-Toe</h2>
+        <ol class="game-how">
+          <li>You are <strong>X</strong>. Tap a cell to place your mark.</li>
+          <li>Get three in a row — across, down, or diagonal.</li>
+          <li>The AI plays <strong>O</strong>. Beat it to score a win.</li>
+        </ol>
         <div class="scoreboard" aria-live="polite">
           <span class="score-pill" data-wins>Wins ${scores.wins}</span>
           <span class="score-pill" data-losses>Losses ${scores.losses}</span>

@@ -551,6 +551,21 @@ a {
   padding: 0.55rem 0.7rem;
   background: rgba(11, 31, 36, 0.45);
   text-align: center;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.best-chip:hover {
+  border-color: rgba(200, 245, 66, 0.45);
+  background: rgba(200, 245, 66, 0.08);
+  transform: translateY(-2px);
+}
+
+.best-chip:focus-visible {
+  outline: 2px solid rgba(200, 245, 66, 0.55);
+  outline-offset: 2px;
 }
 
 .best-chip span {
